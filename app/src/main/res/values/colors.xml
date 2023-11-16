@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#DCBFFF</color>
+    <color name="colorPrimaryDark">#dee2ff</color>
+    <color name="colorAccent">#fefae0</color>
+
+    <!-- 기본 -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="whiteForBackground">#FFFFFF</color>
+    <color name="blackForText">#4a4a4a</color>
+    <color name="redForText">#d9534f</color>
+
+    <color name="gray">#E8E8E8</color>
+
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/btnTotalFile"
+        android:icon="@drawable/img_totalfile"
+        android:title="전체 파일"/>
+
+    <item
+        android:id="@+id/btnPlayList"
+        android:icon="@drawable/img_playlist"
+        android:title="재생 목록"/>
+
+    <item
+        android:id="@+id/btnCurrentList"
+        android:icon="@drawable/img_playlistadd"
+        android:title="현재 목록"/>
+
+    <item
+        android:id="@+id/btnConnectServer"
+        android:icon="@drawable/img_server"
+        android:title="서버 접속"/>
+</menu>
