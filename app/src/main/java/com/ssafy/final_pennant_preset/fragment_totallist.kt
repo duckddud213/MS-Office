@@ -11,9 +11,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.final_pennant.R
@@ -32,7 +34,10 @@ class fragment_totallist : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initData()
+        if (!musicviewmodel.initialized) {
+            initData()
+            musicviewmodel.initialized = true
+        }
     }
 
     override fun onCreateView(
@@ -51,9 +56,13 @@ class fragment_totallist : Fragment() {
     private fun initView() {
         val musicAdapter = MusicAdapter(musicviewmodel.MusicList)
 
+        musicAdapter.notifyDataSetChanged()
+
         binding.rvTotalSong.apply {
             adapter = musicAdapter
             this.layoutManager = LinearLayoutManager(requireActivity())
+//            addItemDecoration(DividerItemDecoration(requireContext(),LinearLayout.VERTICAL))
+            addItemDecoration(CustomItemDecoration())
         }
     }
 
@@ -71,6 +80,7 @@ class fragment_totallist : Fragment() {
                 title.text = music.title
                 artist.text = music.artist
                 genre.text = music.genre
+                Log.d(TAG, "bind: 제목은 ${music.title} / 장르는 ${music.genre}")
             }
         }
 
@@ -100,7 +110,6 @@ class fragment_totallist : Fragment() {
     }
 
     private fun initData() {
-        Log.d(TAG, "initData: aa")
         var i = 0
         val musiclist = mutableListOf<MusicDTO>()
         getMP3().use {
@@ -115,18 +124,18 @@ class fragment_totallist : Fragment() {
                     val genre = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
 
                     val dto = MusicDTO(id, title, albumId, artist, genre)
-                    musiclist.add(dto)
-                    musicviewmodel.MusicList.add(dto)
-                    Log.d(TAG, "initData: ${i++} : ${dto}")
+
+                    //기본 설정 통화 녹음 파일들 제외
+                    if (!dto.title.contains("통화") && !dto.title.contains("녹음")) {
+                        musiclist.add(dto)
+                        musicviewmodel.MusicList.add(dto)
+                    }
                 } while (it.moveToNext())
             }
-            Log.d(TAG, "initData: a${musiclist.get(0)}")
-            Log.d(TAG, "initData: b${musicviewmodel.MusicList.get(0)}")
         }
     }
 
     private fun getMP3(): Cursor {
-        Log.d(TAG, "getMP3: ")
         val resolver = requireActivity().contentResolver
         val queryUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 

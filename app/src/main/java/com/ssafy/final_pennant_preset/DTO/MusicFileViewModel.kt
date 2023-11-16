@@ -14,6 +14,8 @@ class MusicFileViewModel:ViewModel() {
 //        _MusicList.value = musicFile
 //    }
 
+    var initialized :Boolean = false
+
     var MusicList = mutableListOf<MusicDTO>()
         private set
 }
