@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
-            supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_currentlist()).commit()
+            supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_totallist()).commit()
 
             bottomNavView.setOnItemSelectedListener {
                 Log.d(TAG, "onCreate: Clicked!${it.itemId}")

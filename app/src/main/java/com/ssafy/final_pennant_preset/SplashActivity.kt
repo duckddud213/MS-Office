@@ -61,14 +61,29 @@ class SplashActivity : AppCompatActivity() {
                     ).show()
                 }
             }
-            TedPermission.with(this)
-                .setPermissionListener(permissionListener)
-                .setDeniedMessage("[설정] 에서 파일 접근 권한을 부여해야만 사용이 가능합니다.")
-                // 필요한 권한 설정
-                .setPermissions(
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                )
-                .check()
+
+            if(Build.VERSION.SDK_INT>=33){
+                TedPermission.with(this)
+                    .setPermissionListener(permissionListener)
+                    .setDeniedMessage("[설정] 에서 파일 접근 권한을 부여해야만 사용이 가능합니다.")
+                    // 필요한 권한 설정
+                    .setPermissions(
+                        Manifest.permission.POST_NOTIFICATIONS,
+                        Manifest.permission.READ_MEDIA_AUDIO,
+                    )
+                    .check()
+            }
+            else{
+                TedPermission.with(this)
+                    .setPermissionListener(permissionListener)
+                    .setDeniedMessage("[설정] 에서 파일 접근 권한을 부여해야만 사용이 가능합니다.")
+                    // 필요한 권한 설정
+                    .setPermissions(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                    )
+                    .check()
+
+            }
         } else {
             Handler(Looper.getMainLooper()).postDelayed({
                 startActivity(Intent(this@SplashActivity, MainActivity::class.java))
@@ -81,11 +96,12 @@ class SplashActivity : AppCompatActivity() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle("파일 접근 권한 비활성화")
         builder.setMessage(
-            "앱을 사용하기 위해서는 접근 권한이 필요합니다.\n"
+            "앱을 사용하기 위해서는 알림 설정과 오디오 접근 권한이 필요합니다.\n"
         )
         builder.setCancelable(true)
         builder.setPositiveButton("설정") { _, _ ->
             val fileSettingIntent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+
         }
         builder.setNegativeButton(
             "취소"
@@ -94,6 +110,11 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun checkPermission(): Boolean {
+        if(Build.VERSION.SDK_INT>=33){
+            if(checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED){
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
         return checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
     }
 
