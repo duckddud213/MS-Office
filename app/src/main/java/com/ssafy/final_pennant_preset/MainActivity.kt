@@ -8,7 +8,6 @@ import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.ActivityMainBinding
 
 private const val TAG = "MainActivity_싸피"
-
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
 
@@ -16,15 +15,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
-
-            bottomNavView.labelVisibilityMode =NavigationBarView.LABEL_VISIBILITY_UNLABELED
-            bottomNavView.menu.findItem(R.id.btnTotalFile).isCheckable = false
-            bottomNavView.menu.findItem(R.id.btnPlayList).isCheckable = false
-            bottomNavView.menu.findItem(R.id.btnCurrentList).isCheckable = false
-            bottomNavView.menu.findItem(R.id.btnConnectServer).isCheckable = false
-            supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_song()).commitAllowingStateLoss()
+            supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_currentlist()).commit()
 
             bottomNavView.setOnItemSelectedListener {
+                Log.d(TAG, "onCreate: Clicked!${it.itemId}")
                 val transaction = supportFragmentManager.beginTransaction()
                 binding.apply {
                     bottomNavView.menu.findItem(R.id.btnTotalFile).isCheckable = true

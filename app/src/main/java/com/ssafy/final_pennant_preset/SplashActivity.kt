@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
@@ -23,25 +24,27 @@ import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant_preset.DTO.MusicDTO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 private const val TAG = "SplashActivity_싸피"
+
 @RequiresApi(Build.VERSION_CODES.R)
 class SplashActivity : AppCompatActivity() {
 
-    private val musicviewmodel : MusicFileViewModel by viewModels()
+    private val musicviewmodel: MusicFileViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_splash)
 
-
-        if(!checkPermission()){
+        if (!checkPermission()) {
             val permissionListener = object : PermissionListener {
                 // 권한 얻기에 성공했을 때 동작 처리
                 override fun onPermissionGranted() {
-                    initData();
                     Handler(Looper.getMainLooper()).postDelayed({
                         startActivity(Intent(this@SplashActivity, MainActivity::class.java))
                         finish()
@@ -66,9 +69,7 @@ class SplashActivity : AppCompatActivity() {
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                 )
                 .check()
-        }
-        else{
-            initData();
+        } else {
             Handler(Looper.getMainLooper()).postDelayed({
                 startActivity(Intent(this@SplashActivity, MainActivity::class.java))
                 finish()
@@ -76,7 +77,7 @@ class SplashActivity : AppCompatActivity() {
         }
     }
 
-    private fun showPermissionCheckDialog(){
+    private fun showPermissionCheckDialog() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle("파일 접근 권한 비활성화")
         builder.setMessage(
@@ -96,39 +97,6 @@ class SplashActivity : AppCompatActivity() {
         return checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun initData(){
-        getMP3().use {
-            if(it.moveToFirst()){
-                do {
-//                    data class MusicDTO(val id:Long, val title:String,val albumId:Long, val artist:String, val genre:String)
-                    val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                    val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
-                    val albumId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                    val artist = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
-                    val genre = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
 
-                    val dto = MusicDTO(id,title,albumId,artist,genre)
-                    musicviewmodel.setMusicList(dto)
-                }while(it.moveToNext())
-            }
-        }
-    }
-
-    private fun getMP3(): Cursor {
-        val resolver = contentResolver
-        val queryUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-
-        val sortOrder = MediaStore.Audio.Media.TITLE+" ASC"
-
-        val mp3File = arrayOf(
-            MediaStore.Audio.Media._ID,
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ALBUM_ID,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.GENRE
-        )
-
-        return resolver.query(queryUri,mp3File,null,null,sortOrder)!!
-    }
 
 }
