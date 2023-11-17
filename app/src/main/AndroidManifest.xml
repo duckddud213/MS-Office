@@ -13,6 +13,7 @@
 
     <application
         android:allowBackup="true"
+        android:name="com.ssafy.final_pennant_preset.config.ApplicationClass"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/app_icon_ssafy"

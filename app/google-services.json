@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "131205501798",
+    "firebase_url": "https://myfinalpannelrace-default-rtdb.firebaseio.com",
+    "project_id": "myfinalpannelrace",
+    "storage_bucket": "myfinalpannelrace.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131205501798:android:cb508f60b2ffebf34beea7",
+        "android_client_info": {
+          "package_name": "com.ssafy.final_pennant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "131205501798-iloqllbnsplhc5s98o63bs73nf5caaf2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ssafy.final_pennant",
+            "certificate_hash": "f375431abbf7f3e694db82b60f0801d7199f8dad"
+          }
+        },
+        {
+          "client_id": "131205501798-6t3uaiq6p778gnpd9ggsms6bf14h7vpb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRc9THXtfvwwuLE2bqWMPULCTwtwfrHq0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "131205501798-6t3uaiq6p778gnpd9ggsms6bf14h7vpb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
