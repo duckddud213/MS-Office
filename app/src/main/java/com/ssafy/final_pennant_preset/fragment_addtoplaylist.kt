@@ -106,11 +106,11 @@ class fragment_addtoplaylist : Fragment() {
                     //cId, cName : 체크한 항목 || pId, pName : 전체 재생 목록에 있는 항목
                     var cId = musicfileviewmodel.checkedPlayList[i].playlistId
                     var cName = musicfileviewmodel.checkedPlayList[i].playlistname
-                    var pId = musicfileviewmodel.playList[i].playlistId
-                    var pName = musicfileviewmodel.playList[i].playlistname
+                    var pId = musicfileviewmodel.playList[j].playlistId
+                    var pName = musicfileviewmodel.playList[j].playlistname
 
                     if(checkSameData(cId,cName,pId,pName)){
-                        musicfileviewmodel.playList[i].songlist.add(songInfo)
+                        musicfileviewmodel.playList[j].songlist.add(songInfo)
                     }
                 }
             }
