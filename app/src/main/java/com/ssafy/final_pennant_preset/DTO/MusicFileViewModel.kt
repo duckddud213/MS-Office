@@ -14,8 +14,14 @@ class MusicFileViewModel:ViewModel() {
 //        _MusicList.value = musicFile
 //    }
 
-    var initialized :Boolean = false
-
     var MusicList = mutableListOf<MusicDTO>()
         private set
+
+    var playList = mutableListOf<PlayListDTO>()
+        private set
+
+    var checkedPlayList = mutableListOf<checkboxData>()
+        private set
+
+    lateinit var selectedMusic : MusicDTO
 }

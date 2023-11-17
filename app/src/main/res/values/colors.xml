@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#DCBFFF</color>
     <color name="colorPrimaryDark">#dee2ff</color>
-    <color name="colorAccent">#fefae0</color>
+    <color name="colorAccent">#C683D7</color>
 
     <!-- 기본 -->
     <color name="white">#FFFFFF</color>

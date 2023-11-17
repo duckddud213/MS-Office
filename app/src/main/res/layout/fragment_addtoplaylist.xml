@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/layoutPageInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/img_save" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="해당 곡을 추가할 \n 재생 목록을 선택해주세요."
+                android:textAlignment="center"
+                android:textSize="24sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/horizontal_divider"
+            android:layout_width="350dp"
+            android:layout_height="1dp"
+            android:background="@color/colorPrimary"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layoutPageInfo"
+            app:layout_constraintBottom_toTopOf="@id/lvAddPlaylist"  />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/lvAddPlaylist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:choiceMode="multipleChoice"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/horizontal_divider"/>
+
+        <Button
+            android:id="@+id/btnAddSongToSelectedPlaylist"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="추가"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/btnGoBacks"
+            app:layout_constraintEnd_toEndOf="@+id/lvAddPlaylist" />
+
+        <Button
+            android:id="@+id/btnGoBacks"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="취소"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
