@@ -14,12 +14,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.FragmentAddtoplaylistBinding
-import com.ssafy.final_pennant_preset.DTO.MusicFileViewModel
-import com.ssafy.final_pennant_preset.DTO.PlayListDTO
-import com.ssafy.final_pennant_preset.DTO.checkboxData
+import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
+import com.ssafy.final_pennant_preset.dto.PlayListDTO
+import com.ssafy.final_pennant_preset.dto.checkboxData
 
-private const val TAG = "fragment_totallist_싸피"
-
+private const val TAG = "fragment_addtoplaylist_싸피"
 class fragment_addtoplaylist : Fragment() {
     private var _binding: FragmentAddtoplaylistBinding? = null
     private val binding: FragmentAddtoplaylistBinding
@@ -27,40 +27,6 @@ class fragment_addtoplaylist : Fragment() {
 
     val musicfileviewmodel: MusicFileViewModel by activityViewModels()
     private val playList = mutableListOf<PlayListDTO>()
-
-    fun setTestData() {
-        //        테스트용 데이터
-        var dto = PlayListDTO("test", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto)
-        var dto2 = PlayListDTO("test2", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto2)
-        var dto3 = PlayListDTO("test3", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto3)
-        var dto4 = PlayListDTO("test4", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto4)
-        var dto5 = PlayListDTO("test5", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto5)
-        var dto6 = PlayListDTO("test6", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto6)
-        var dto7 = PlayListDTO("tes7", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto7)
-        var dto8 = PlayListDTO("test8", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto8)
-        var dto9 = PlayListDTO("test9", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto9)
-        var dto10 = PlayListDTO("test10", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto10)
-        var dto11 = PlayListDTO("test11", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto11)
-        var dto12 = PlayListDTO("test12", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto12)
-        var dto13 = PlayListDTO("test13", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto13)
-        var dto14 = PlayListDTO("test14", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto14)
-        var dto15 = PlayListDTO("test15", musicfileviewmodel.MusicList)
-        musicfileviewmodel.playList.add(dto15)
-    }
 
     fun checkSameData(Name1: String, Name2: String): Boolean {
         if (Name1.equals(Name2)) {
@@ -72,14 +38,13 @@ class fragment_addtoplaylist : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        musicfileviewmodel.checkedPlayList.clear()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-//        musicfileviewmodel.playList.clear()
-//        setTestData()
         _binding = FragmentAddtoplaylistBinding.inflate(inflater, container, false)
         val allplaylistadapter = AllPlayListAdapter(musicfileviewmodel.playList)
         binding.lvAddPlaylist.apply {
@@ -93,7 +58,6 @@ class fragment_addtoplaylist : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         //재생목록이 없는 상태면 Toast메시지나 Dialog로 안내하고 강제로 페이지 전환 추가
-//        if()
 
         var songInfo = musicfileviewmodel.selectedMusic
 
@@ -109,10 +73,21 @@ class fragment_addtoplaylist : Fragment() {
                     //cId, cName : 체크한 항목 || pId, pName : 전체 재생 목록에 있는 항목
                     var cName = musicfileviewmodel.checkedPlayList[i].playlistname
                     var pName = musicfileviewmodel.playList[j].playlistname
+                    var isDup=false
 
                     if (checkSameData(cName, pName)) {
-                        musicfileviewmodel.playList[j].songlist.add(songInfo)
+                        for(k in 0..musicfileviewmodel.playList[j].songlist.size-1){
+                            //이미 재생목록에 있는 곡일 경우 추가하지 않음
+                            if(musicfileviewmodel.playList[j].songlist.get(k).equals(songInfo)){
+                                isDup=true
+                            }
+                        }
+                        if(!isDup){
+                            musicfileviewmodel.playList[j].songlist.add(songInfo)
+                        }
+                        Log.d(TAG, "onViewCreated: ${musicfileviewmodel.playList[j].playlistname} / ${musicfileviewmodel.playList[j].songlist.size}")
                     }
+                    ApplicationClass.sSharedPreferences.putSongList(musicfileviewmodel.playList[j].playlistname,musicfileviewmodel.playList[j].songlist)
                 }
             }
 

@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity() {
             bottomNavView.setOnItemSelectedListener {
                 Log.d(TAG, "onCreate: Clicked!${it.itemId}")
                 val transaction = supportFragmentManager.beginTransaction()
+                supportFragmentManager.popBackStack(null,FragmentManager.POP_BACK_STACK_INCLUSIVE)
                 binding.apply {
                     bottomNavView.menu.findItem(R.id.btnTotalFile).isCheckable = true
                     bottomNavView.menu.findItem(R.id.btnPlayList).isCheckable = true
@@ -82,6 +84,7 @@ class MainActivity : AppCompatActivity() {
                 bottomNavView.menu.findItem(R.id.btnConnectServer).isCheckable = false
                 bottomNavView.labelVisibilityMode =NavigationBarView.LABEL_VISIBILITY_UNLABELED
 
+                supportFragmentManager.popBackStack(null,FragmentManager.POP_BACK_STACK_INCLUSIVE)
                 supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_song()).commit()
             }
         }

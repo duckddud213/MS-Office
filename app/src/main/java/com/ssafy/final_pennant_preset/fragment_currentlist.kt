@@ -1,60 +1,171 @@
 package com.ssafy.final_pennant_preset
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
+import android.view.ContextMenu
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.final_pennant.R
+import com.ssafy.final_pennant.databinding.FragmentCurrentlistBinding
+import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.dto.MusicDTO
+import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
+import com.ssafy.final_pennant_preset.dto.PlayListDTO
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val TAG = "fragment_currentlist_싸피"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [fragment_currentlist.newInstance] factory method to
- * create an instance of this fragment.
- */
 class fragment_currentlist : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var _binding: FragmentCurrentlistBinding? = null
+    private val binding: FragmentCurrentlistBinding
+        get() = _binding!!
+    private lateinit var callback: OnBackPressedCallback
+
+    val musicviewmodel : MusicFileViewModel by activityViewModels()
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+        musicviewmodel.selectedPlaylistName = ApplicationClass.sSharedPreferences.getCurSongList()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_currentlist, container, false)
-    }
+        _binding = FragmentCurrentlistBinding.inflate(inflater,container,false)
+        var currentPlayListAdapter : CurrentPlayListAdapter
+        var list : MutableList<MusicDTO> = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment fragment_currentlist.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            fragment_currentlist().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+        if(!musicviewmodel.selectedPlaylistName.equals("")){
+            //선택된 재생목록이 있는 경우
+            binding.tvCurrentList.text = musicviewmodel.selectedPlaylistName
+
+            for(i in 0..musicviewmodel.playList.size-1){
+                if(musicviewmodel.playList.get(i).playlistname.equals(musicviewmodel.selectedPlaylistName)){
+                    list = musicviewmodel.playList.get(i).songlist
+                    break
                 }
             }
+            
+            currentPlayListAdapter= CurrentPlayListAdapter(list)
+        }
+        else{
+            //선택된 재생목록이 없는 경우 => 빈 리스트 전달
+            currentPlayListAdapter= CurrentPlayListAdapter(mutableListOf<MusicDTO>())
+        }
+
+        currentPlayListAdapter.notifyDataSetChanged()
+        
+        binding.rvCurrentPlayList.apply {
+            adapter = currentPlayListAdapter
+            this.layoutManager = LinearLayoutManager(requireActivity())
+            addItemDecoration(CustomItemDecoration())
+        }
+
+        return binding.root
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+    }
+
+    inner class CurrentPlayListAdapter(val songlist: MutableList<MusicDTO>) :
+        RecyclerView.Adapter<CurrentPlayListAdapter.CurrentPlayListViewHolder>() {
+        inner class CurrentPlayListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+            View.OnCreateContextMenuListener {
+            var title = itemView.findViewById<TextView>(R.id.tvSongTitle)
+            var artist = itemView.findViewById<TextView>(R.id.tvSongArtist)
+            var genre = itemView.findViewById<TextView>(R.id.tvSongGenre)
+
+            init {
+                itemView.setOnCreateContextMenuListener(this)
+            }
+
+            fun bind(list: MusicDTO) {
+                Log.d(TAG, "bind: ${list.id} / ${list.albumId} / ${list.title} / ${list.artist} / ${list.genre}")
+                title.text = list.title
+                artist.text=list.artist
+                genre.text=list.genre
+            }
+
+            override fun onCreateContextMenu(
+                menu: ContextMenu?,
+                v: View?,
+                menuInfo: ContextMenu.ContextMenuInfo?
+            ) {
+                requireActivity().apply {
+                    menuInflater.inflate(R.menu.playlistcontextmenu, menu)
+                    menu?.findItem(R.id.context_menu_delete_playlist)
+                        ?.setOnMenuItemClickListener {
+
+                            val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+                            builder.setTitle("재생목록에서 삭제")
+                            builder.setMessage(
+                                "현재 재생 목록에서 [${songlist[layoutPosition].title}]을 삭제하시겠습니까?"
+                            )
+                            builder.setCancelable(true)
+                            builder.setPositiveButton("삭제") { _, _ ->
+
+//                                for(i in 0..musicviewmodel.playList.size-1){
+//                                    if(musicviewmodel.playList.get(i).playlistname.equals(playlists[layoutPosition].playlistname)){
+//                                        ApplicationClass.sSharedPreferences.deleteSongListName(playlists[layoutPosition].playlistname)
+//                                        musicviewmodel.playList.removeAt(i)
+//                                        binding.rvTotalPlayList.adapter!!.notifyItemRemoved(i)
+//                                        break
+//                                    }
+//                                }
+                            }
+                            builder.setNegativeButton(
+                                "취소"
+                            ) { dialog, _ -> dialog.cancel() }
+                            builder.create().show()
+
+                            true
+                        }
+                }
+            }
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CurrentPlayListViewHolder {
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.playlist_songs_item, parent, false)
+            return CurrentPlayListViewHolder(view).apply {
+                //클릭 시 해당 곡 재생 기능 추가
+                itemView.setOnClickListener {
+//                    for(i in 0..musicviewmodel.playList.size-1){
+//                        if(musicviewmodel.playList.get(i).playlistname==playlists[layoutPosition].playlistname){
+//                            musicviewmodel.selectedPlaylist=musicviewmodel.playList.get(i)
+//                            requireActivity().apply {
+//                                findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(R.id.btnPlayList).isChecked=false
+//                                findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(R.id.btnCurrentList).isChecked=true
+//                                supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_currentlist()).commit()
+//                            }
+//                            break
+//                        }
+//                    }
+                }
+            }
+        }
+
+        override fun onBindViewHolder(holder: CurrentPlayListAdapter.CurrentPlayListViewHolder, position: Int) {
+            holder.bind(songlist.get(position))
+        }
+
+        override fun getItemCount(): Int {
+            return songlist.size
+        }
     }
 }

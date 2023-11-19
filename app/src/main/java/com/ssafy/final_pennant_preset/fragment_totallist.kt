@@ -1,6 +1,7 @@
 package com.ssafy.final_pennant_preset
 
 
+import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -8,20 +9,18 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.ContextMenu
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.View.OnCreateContextMenuListener
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.FragmentTotallistBinding
-import com.ssafy.final_pennant_preset.DTO.MusicDTO
-import com.ssafy.final_pennant_preset.DTO.MusicFileViewModel
+import com.ssafy.final_pennant_preset.dto.MusicDTO
+import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 
 private const val TAG = "fragment_totallist_싸피"
 
@@ -31,6 +30,10 @@ class fragment_totallist : Fragment() {
         get() = _binding!!
 
     val musicviewmodel: MusicFileViewModel by activityViewModels()
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +53,10 @@ class fragment_totallist : Fragment() {
         super.onViewCreated(view, savedInstanceState)
     }
 
+    override fun onDetach() {
+        super.onDetach()
+    }
+
     private fun initView() {
         val musicAdapter = MusicAdapter(musicviewmodel.MusicList)
 
@@ -58,7 +65,6 @@ class fragment_totallist : Fragment() {
         binding.rvTotalSong.apply {
             adapter = musicAdapter
             this.layoutManager = LinearLayoutManager(requireActivity())
-//            addItemDecoration(DividerItemDecoration(requireContext(),LinearLayout.VERTICAL))
             addItemDecoration(CustomItemDecoration())
         }
     }
@@ -97,7 +103,7 @@ class fragment_totallist : Fragment() {
                             musicviewmodel.selectedMusic = musicList[layoutPosition]
                             supportFragmentManager.beginTransaction()
                                 .replace(R.id.framecontainer, fragment_addtoplaylist())
-                                .addToBackStack(null).commit()
+                                .addToBackStack("addSongToPlayList").commit()
                             Log.d(TAG, "onCreateContextMenu: ${musicviewmodel.selectedMusic}")
                             true
                         }

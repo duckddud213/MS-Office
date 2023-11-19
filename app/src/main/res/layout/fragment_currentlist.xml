@@ -3,13 +3,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment_currentlist">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="currentList fragment"
-        android:textSize="32sp"/>
+        android:layout_height="match_parent">
 
+        <TextView
+            android:id="@+id/tvCurrentList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:text="선택된 재생목록 없음"
+            android:textSize="32sp" />
+
+        <View
+            android:id="@+id/cur_divider"
+            android:layout_width="400dp"
+            android:layout_height="5dp"
+            android:background="@color/colorPrimary"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvCurrentList"
+            app:layout_constraintBottom_toTopOf="@id/rvCurrentPlayList"  />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCurrentPlayList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cur_divider" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

@@ -1,4 +1,4 @@
-package com.ssafy.final_pennant_preset.DTO
+package com.ssafy.final_pennant_preset.dto
 
 data class MusicDTO(val id:Long, val title:String,val albumId:Long, val artist:String, val genre:String)
 

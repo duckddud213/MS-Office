@@ -1,8 +1,5 @@
-package com.ssafy.final_pennant_preset.DTO
+package com.ssafy.final_pennant_preset.dto
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 
 class MusicFileViewModel:ViewModel() {
@@ -23,5 +20,7 @@ class MusicFileViewModel:ViewModel() {
     var checkedPlayList = mutableListOf<checkboxData>()
         private set
 
-    lateinit var selectedMusic : MusicDTO
+    var selectedMusic : MusicDTO = MusicDTO(-1,"",-1,"","")
+
+    var selectedPlaylistName : String = ""
 }

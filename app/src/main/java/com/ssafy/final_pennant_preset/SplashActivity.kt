@@ -3,31 +3,20 @@ package com.ssafy.final_pennant_preset
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import com.ssafy.final_pennant_preset.DTO.MusicFileViewModel
+import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import com.ssafy.final_pennant.R
-import com.ssafy.final_pennant_preset.DTO.MusicDTO
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 private const val TAG = "SplashActivity_싸피"
 
