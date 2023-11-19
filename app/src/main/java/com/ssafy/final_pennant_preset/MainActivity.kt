@@ -1,23 +1,34 @@
 package com.ssafy.final_pennant_preset
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.ActivityMainBinding
 import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.service.FirebaseTokenService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity() {
@@ -28,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     // [END declare_auth]
     private lateinit var googleSignInClient: GoogleSignInClient
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -75,14 +87,26 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(binding.root)
 
+        checkLogin()
 
-        //pref 에서 조회 여부에 따른 처리 필요
-        val userID = ApplicationClass.sSharedPreferences.getString("userID") ?: ""
+        initFirebase()
+
+        createNotificationChannel(CHANNEL_BALLAD, "ssafy")
+        createNotificationChannel(CHANNEL_DANCE, "ssafy")
+        createNotificationChannel(CHANNEL_IDOL, "ssafy")
+        createNotificationChannel(CHANNEL_POP, "ssafy")
+        createNotificationChannel(CHANNEL_ROCK, "ssafy")
+    }
+
+    // firebase 로그인 관련
+
+    private fun checkLogin() {
+        val userID = ApplicationClass.sSharedPreferences.getID() ?: ""
         Log.d(TAG, "onCreate: $userID")
         if (userID.isNullOrEmpty()) {
             // firebase 로그인 관련
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken(getString(R.string.app_name))
                 .requestEmail()
                 .build()
 
@@ -93,9 +117,6 @@ class MainActivity : AppCompatActivity() {
             updateUI(currentUser)
         }
     }
-
-    // firebase 로그인 관련
-
     // [START on_start_check_user]
     override fun onStart() {
         super.onStart()
@@ -153,25 +174,69 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUI(user: FirebaseUser?) {
         if (user == null) {
-//            binding.loginTv.text = "인증 실패"
-//            Toast.makeText(this, "인증 실패", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "로그인을 하지 않으면 파일을 업로드할 수 없습니다", Toast.LENGTH_SHORT).show()
             Log.d(TAG, "updateUI 실패")
         } else {
             user.displayName?.let {
                 ApplicationClass.sSharedPreferences.putID(it)
                 Log.d(TAG, "updateUI: $it")
             }
-
-//            startActivity(Intent(this, MainActivity::class.java).apply {
-//                Log.d(TAG, "onCreate: ${user.photoUrl.toString()}")
-//                Log.d(TAG, "onCreate: ${user.displayName}")
-//                putExtra("userImg", user.photoUrl.toString())
-//                putExtra("userName", user.displayName)
-//            })
         }
+    }
+
+    // firebase push 관련
+    private fun initFirebase() {
+        // FCM 토큰 수신
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w(TAG, "FCM 토큰 얻기에 실패하였습니다.", task.exception)
+                return@OnCompleteListener
+            }
+            // token log 남기기
+            Log.d(TAG, "token: ${task.result?:"task.result is null"}")
+            if(task.result != null){
+//                uploadToken(task.result!!)
+            }
+        })
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel(id: String, name: String) {
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(id, name, importance)
+
+        val notificationManager: NotificationManager
+                = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     companion object {
         private const val RC_SIGN_IN = 9001
+        const val CHANNEL_DANCE = "channel_dance"
+        const val CHANNEL_ROCK = "channel_rock"
+        const val CHANNEL_BALLAD = "channel_ballad"
+        const val CHANNEL_POP = "channel_pop"
+        const val CHANNEL_IDOL = "channel_idol"
+
+        // main에 1개
+        // firebaseservice에 1개 주석 처리되있음
+        fun uploadToken(token:String){
+            // 새로운 토큰 수신 시 서버로 전송
+            val service = ApplicationClass.sRetrofit.create(FirebaseTokenService::class.java)
+            service.uploadToken(token).enqueue(object : Callback<String> {
+                override fun onResponse(call: Call<String>, response: Response<String>) {
+                    if(response.isSuccessful){
+                        val res = response.body()
+                        Log.d(TAG, "onResponse: $res")
+                    } else {
+                        Log.d(TAG, "onResponse: Error Code ${response.code()}")
+                    }
+                }
+                override fun onFailure(call: Call<String>, t: Throwable) {
+                    Log.d(TAG, t.message ?: "토큰 정보 등록 중 통신오류")
+                }
+            })
+        }
     }
 }

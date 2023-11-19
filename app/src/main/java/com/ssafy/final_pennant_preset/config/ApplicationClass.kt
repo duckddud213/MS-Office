@@ -1,11 +1,17 @@
 package com.ssafy.final_pennant_preset.config
 
 import android.app.Application
+import android.util.Log
+import com.ssafy.final_pennant_preset.service.FirebaseTokenService
 import com.ssafy.final_pennant_preset.util.SharedPreferencesUtil
 import okhttp3.OkHttpClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
+private const val TAG = "ApplicationClass"
 class ApplicationClass : Application() {
 
     //url must be end with "/"
