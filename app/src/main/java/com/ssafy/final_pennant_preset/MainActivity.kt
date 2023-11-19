@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity() {
             // token log 남기기
             Log.d(TAG, "token: ${task.result?:"task.result is null"}")
             if(task.result != null){
-//                uploadToken(task.result!!)
+                uploadToken(task.result!!)
             }
         })
     }
@@ -213,6 +213,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val RC_SIGN_IN = 9001
+        val CHANNEL = arrayOf("channel_dance", "channel_rock", "channel_ballad", "channel_pop", "channel_idol")
         const val CHANNEL_DANCE = "channel_dance"
         const val CHANNEL_ROCK = "channel_rock"
         const val CHANNEL_BALLAD = "channel_ballad"

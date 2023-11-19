@@ -9,6 +9,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "ApplicationClass"
@@ -16,7 +17,8 @@ class ApplicationClass : Application() {
 
     //url must be end with "/"
     val IP_ADDR = "43.202.250.12:9987"
-    val API_URL = "http://$IP_ADDR/music/"
+//    val IP_ADDR = "192.168.0.7:9987"
+    val API_URL = "http://$IP_ADDR/"
 
     companion object {
         // 전역변수 문법을 통해 Retrofit 인스턴스를 앱 실행 시 1번만 생성하여 사용 (싱글톤 객체)
@@ -54,7 +56,7 @@ class ApplicationClass : Application() {
         sRetrofit = Retrofit.Builder()
             .baseUrl(API_URL)
             .client(client)
-//            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 }
