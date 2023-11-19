@@ -136,8 +136,6 @@ class fragment_totallist : Fragment() {
     }
 
     private fun initData() {
-        var i = 0
-        val musiclist = mutableListOf<MusicDTO>()
         musicviewmodel.MusicList.clear()
         getMP3().use {
             if (it.moveToFirst()) {
