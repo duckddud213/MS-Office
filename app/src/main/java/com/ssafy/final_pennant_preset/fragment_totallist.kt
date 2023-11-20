@@ -1,8 +1,11 @@
 package com.ssafy.final_pennant_preset
 
 
+import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -17,10 +20,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.FragmentTotallistBinding
+import com.ssafy.final_pennant_preset.config.ApplicationClass
 import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
+import com.ssafy.final_pennant_preset.dto.PlayListDTO
 
 private const val TAG = "fragment_totallist_싸피"
 
@@ -37,7 +43,9 @@ class fragment_totallist : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(R.id.btnTotalFile).isChecked=true
         initData()
+        getPlayList()
     }
 
     override fun onCreateView(
@@ -55,6 +63,16 @@ class fragment_totallist : Fragment() {
 
     override fun onDetach() {
         super.onDetach()
+    }
+
+    private fun getPlayList() {
+        musicviewmodel.playList.clear()
+        var namelistarray = ApplicationClass.sSharedPreferences.getSongListName()
+
+        for(i in 0..namelistarray.size-2){
+            Log.d(TAG, "getPlayList: ${namelistarray.get(i)}")
+            musicviewmodel.playList.add(PlayListDTO(namelistarray.get(i), ApplicationClass.sSharedPreferences.getSongList(namelistarray.get(i))))
+        }
     }
 
     private fun initView() {
@@ -85,6 +103,7 @@ class fragment_totallist : Fragment() {
             }
 
             fun bind(music: MusicDTO) {
+                Log.d(TAG, "bind: ${music.id}")
                 title.text = music.title
                 artist.text = music.artist
                 genre.text = music.genre
@@ -142,6 +161,7 @@ class fragment_totallist : Fragment() {
     }
 
     private fun initData() {
+        val queryUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         musicviewmodel.MusicList.clear()
         getMP3().use {
             if (it.moveToFirst()) {
@@ -169,13 +189,13 @@ class fragment_totallist : Fragment() {
         val queryUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
         val sortOrder = MediaStore.Audio.Media.TITLE + " ASC"
-
+        
         val mp3File = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.GENRE
+            MediaStore.Audio.Media.GENRE,
         )
 
         return resolver.query(queryUri, mp3File, null, null, sortOrder)!!

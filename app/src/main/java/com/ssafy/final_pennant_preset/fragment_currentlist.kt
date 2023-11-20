@@ -29,6 +29,7 @@ class fragment_currentlist : Fragment() {
     private val binding: FragmentCurrentlistBinding
         get() = _binding!!
     private lateinit var callback: OnBackPressedCallback
+    private lateinit var list : MutableList<MusicDTO>
 
     val musicviewmodel : MusicFileViewModel by activityViewModels()
 
@@ -38,6 +39,7 @@ class fragment_currentlist : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(R.id.btnCurrentList).isChecked=true
         musicviewmodel.selectedPlaylistName = ApplicationClass.sSharedPreferences.getCurSongList()
     }
 
@@ -47,27 +49,26 @@ class fragment_currentlist : Fragment() {
     ): View? {
         _binding = FragmentCurrentlistBinding.inflate(inflater,container,false)
         var currentPlayListAdapter : CurrentPlayListAdapter
-        var list : MutableList<MusicDTO> = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
-
+        list = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
+        musicviewmodel.selectedPlayList = PlayListDTO(musicviewmodel.selectedPlaylistName,list)
+        
         if(!musicviewmodel.selectedPlaylistName.equals("")){
             //선택된 재생목록이 있는 경우
             binding.tvCurrentList.text = musicviewmodel.selectedPlaylistName
-
             for(i in 0..musicviewmodel.playList.size-1){
                 if(musicviewmodel.playList.get(i).playlistname.equals(musicviewmodel.selectedPlaylistName)){
                     list = musicviewmodel.playList.get(i).songlist
                     break
                 }
             }
-            
-            currentPlayListAdapter= CurrentPlayListAdapter(list)
+
+            currentPlayListAdapter= CurrentPlayListAdapter(musicviewmodel.selectedPlayList.songlist)
         }
         else{
             //선택된 재생목록이 없는 경우 => 빈 리스트 전달
+            binding.tvCurrentList.text="선택된 재생목록 없음"
             currentPlayListAdapter= CurrentPlayListAdapter(mutableListOf<MusicDTO>())
         }
-
-        currentPlayListAdapter.notifyDataSetChanged()
         
         binding.rvCurrentPlayList.apply {
             adapter = currentPlayListAdapter
@@ -118,21 +119,18 @@ class fragment_currentlist : Fragment() {
                             )
                             builder.setCancelable(true)
                             builder.setPositiveButton("삭제") { _, _ ->
-
-//                                for(i in 0..musicviewmodel.playList.size-1){
-//                                    if(musicviewmodel.playList.get(i).playlistname.equals(playlists[layoutPosition].playlistname)){
-//                                        ApplicationClass.sSharedPreferences.deleteSongListName(playlists[layoutPosition].playlistname)
-//                                        musicviewmodel.playList.removeAt(i)
-//                                        binding.rvTotalPlayList.adapter!!.notifyItemRemoved(i)
-//                                        break
-//                                    }
-//                                }
+                                ApplicationClass.sSharedPreferences.deleteSongFromList(musicviewmodel.selectedPlaylistName,songlist[layoutPosition])
+                                Log.d(TAG, "onCreateContextMenu: ${musicviewmodel.selectedPlaylistName} // ${songlist[layoutPosition].title}")
+                                Log.d(TAG, "onCreateContextMenu: ${layoutPosition}")
+                                binding.rvCurrentPlayList.adapter!!.notifyItemRemoved(layoutPosition)
+                                list = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
+                                musicviewmodel.selectedPlayList.songlist.removeAt(layoutPosition)
+                                Log.d(TAG, "onCreateContextMenu: list size : ${list.size}")
                             }
                             builder.setNegativeButton(
                                 "취소"
                             ) { dialog, _ -> dialog.cancel() }
                             builder.create().show()
-
                             true
                         }
                 }
@@ -162,6 +160,8 @@ class fragment_currentlist : Fragment() {
 
         override fun onBindViewHolder(holder: CurrentPlayListAdapter.CurrentPlayListViewHolder, position: Int) {
             holder.bind(songlist.get(position))
+            Log.d(TAG, "onBindViewHolder: ${songlist} / ${songlist.get(position)} / ${songlist.size}")
+            
         }
 
         override fun getItemCount(): Int {

@@ -21,9 +21,9 @@
 
         <View
             android:id="@+id/cur_divider"
-            android:layout_width="400dp"
+            android:layout_width="360dp"
             android:layout_height="5dp"
-            android:background="@color/colorPrimary"
+            android:background="#F4EAE0"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             app:layout_constraintStart_toStartOf="parent"

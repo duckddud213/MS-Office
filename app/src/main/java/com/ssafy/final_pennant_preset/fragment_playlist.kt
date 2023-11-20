@@ -40,6 +40,7 @@ class fragment_playlist : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(R.id.btnPlayList).isChecked=true
         getPlayList()
     }
 
@@ -168,6 +169,9 @@ class fragment_playlist : Fragment() {
                                 for(i in 0..musicviewmodel.playList.size-1){
                                     if(musicviewmodel.playList.get(i).playlistname.equals(playlists[layoutPosition].playlistname)){
                                         ApplicationClass.sSharedPreferences.deleteSongListName(playlists[layoutPosition].playlistname)
+                                        if(musicviewmodel.selectedPlaylistName.equals(musicviewmodel.playList.get(i).playlistname)){
+                                            ApplicationClass.sSharedPreferences.putCurSongList("")
+                                        }
                                         musicviewmodel.playList.removeAt(i)
                                         binding.rvTotalPlayList.adapter!!.notifyItemRemoved(i)
                                         break
