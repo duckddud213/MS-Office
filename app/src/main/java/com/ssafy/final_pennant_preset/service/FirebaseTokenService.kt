@@ -4,7 +4,7 @@ import retrofit2.http.*
 
 interface FirebaseTokenService {
     // Token정보 서버로 전송
-    @POST("token")
-    fun uploadToken(@Query("token") token: String): Call<String>
+    @POST("token/{userUID}")
+    fun uploadToken(@Path("userUID") userUID: String, @Query("token") token: String): Call<String>
 
 }

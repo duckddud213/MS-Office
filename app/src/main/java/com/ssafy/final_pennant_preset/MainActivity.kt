@@ -90,8 +90,6 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(binding.root)
 
-        initFirebase()
-
         checkLogin()
 
         createNotificationChannel(CHANNEL_BALLAD, "ssafy")
@@ -107,6 +105,7 @@ class MainActivity : AppCompatActivity() {
 
         val userEmail = ApplicationClass.sSharedPreferences.getEmail()
         val userUID = ApplicationClass.sSharedPreferences.getUID()
+
         Log.d(TAG, "checkLogin email: $userEmail")
         Log.d(TAG, "checkLogin uid: $userUID")
 
@@ -153,9 +152,12 @@ class MainActivity : AppCompatActivity() {
             } catch (e: ApiException) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e)
+                Toast.makeText(this, "파일 업로드를 위해 로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+                finish()
             }
         } else {
             Log.d(TAG, "onActivityResult: fail")
+            finish()
         }
     }
     // [END onactivityresult]
@@ -174,6 +176,7 @@ class MainActivity : AppCompatActivity() {
                     // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
                     updateUI(null)
+                    finish()
                 }
             }
     }
@@ -199,6 +202,8 @@ class MainActivity : AppCompatActivity() {
             user.uid.let { //not null값
                 ApplicationClass.sSharedPreferences.putUID(it)
             }
+
+            initFirebase()
         }
     }
 
@@ -243,7 +248,10 @@ class MainActivity : AppCompatActivity() {
         fun uploadToken(token:String){
             // 새로운 토큰 수신 시 서버로 전송
             val service = ApplicationClass.sRetrofit.create(FirebaseTokenService::class.java)
-            service.uploadToken(token).enqueue(object : Callback<String> {
+            val userUID = ApplicationClass.sSharedPreferences.getUID()!!
+            Log.d(TAG, "uploadToken: token: $token")
+            Log.d(TAG, "uploadToken: uid : $userUID")
+            service.uploadToken(token, userUID).enqueue(object : Callback<String> {
                 override fun onResponse(call: Call<String>, response: Response<String>) {
                     if(response.isSuccessful){
                         val res = response.body()
