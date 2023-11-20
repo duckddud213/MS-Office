@@ -31,14 +31,24 @@ class SharedPreferencesUtil(context: Context) {
         return preferences.getString(key, null)
     }
 
-    fun putID(value: String) {
+    fun putEmail(value: String) {
         val editor = preferences.edit()
-        editor.putString("userID", value)
+        editor.putString("userEmail", value)
         editor.apply()
     }
 
-    fun getID(): String? {
-        return preferences.getString("userID", null)
+    fun getEmail(): String? {
+        return preferences.getString("userEmail", null)
+    }
+
+    fun putUID(value: String) {
+        val editor = preferences.edit()
+        editor.putString("userUID", value)
+        editor.apply()
+    }
+
+    fun getUID(): String? {
+        return preferences.getString("userUID", null)
     }
 
     /**

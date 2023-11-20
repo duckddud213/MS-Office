@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "131205501798-9un0pamcu1dvp9aebmc09mkrpvil0a6v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ssafy.final_pennant",
+            "certificate_hash": "f00335bf4b08037c96a956e1e57b4e844ec91e86"
+          }
+        },
+        {
           "client_id": "131205501798-iloqllbnsplhc5s98o63bs73nf5caaf2.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

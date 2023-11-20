@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">MS Office</string>
+    <string name="default_web_client_id" translatable="false">131205501798-6t3uaiq6p778gnpd9ggsms6bf14h7vpb.apps.googleusercontent.com</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

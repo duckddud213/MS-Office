@@ -66,8 +66,8 @@ dependencies {
     implementation "gun0912.ted:tedpermission:2.2.3"
 
     // firebase 사용에 필요한 의존성 추가 firebase + database
-    implementation 'com.google.firebase:firebase-database-ktx:20.0.5'
-    implementation platform('com.google.firebase:firebase-bom:32.5.0')
+//    implementation 'com.google.firebase:firebase-database-ktx:20.0.5'
+//    implementation platform('com.google.firebase:firebase-bom:32.5.0')
 
     // firebase auth 에서 필요한 의존성 추가
     implementation 'com.google.firebase:firebase-auth-ktx'

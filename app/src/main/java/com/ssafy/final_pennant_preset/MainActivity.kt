@@ -90,9 +90,9 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(binding.root)
 
-        checkLogin()
-
         initFirebase()
+
+        checkLogin()
 
         createNotificationChannel(CHANNEL_BALLAD, "ssafy")
         createNotificationChannel(CHANNEL_DANCE, "ssafy")
@@ -104,12 +104,16 @@ class MainActivity : AppCompatActivity() {
     // firebase 로그인 관련
 
     private fun checkLogin() {
-        val userID = ApplicationClass.sSharedPreferences.getID() ?: ""
-        Log.d(TAG, "onCreate: $userID")
-        if (userID.isNullOrEmpty()) {
+
+        val userEmail = ApplicationClass.sSharedPreferences.getEmail()
+        val userUID = ApplicationClass.sSharedPreferences.getUID()
+        Log.d(TAG, "checkLogin email: $userEmail")
+        Log.d(TAG, "checkLogin uid: $userUID")
+
+        if (userUID == null) {
             // firebase 로그인 관련
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.app_name))
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build()
 
@@ -177,12 +181,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateUI(user: FirebaseUser?) {
         if (user == null) {
-            Toast.makeText(this, "로그인을 하지 않으면 파일을 업로드할 수 없습니다", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "파일 업로드를 위해 로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
             Log.d(TAG, "updateUI 실패")
         } else {
-            user.displayName?.let {
-                ApplicationClass.sSharedPreferences.putID(it)
-                Log.d(TAG, "updateUI: $it")
+//            Log.d(TAG, "updateUI1: ${user.tenantId}")
+//            Log.d(TAG, "updateUI2: ${user.uid}")
+//            Log.d(TAG, "updateUI3: ${user.email}")
+//            Log.d(TAG, "updateUI4: ${user.displayName}")
+//            Log.d(TAG, "updateUI5: ${user.photoUrl}")
+//            Log.d(TAG, "updateUI5: ${user.phoneNumber}")
+//            Log.d(TAG, "updateUI6: ${user.providerId}")
+
+            user.email?.let {
+                ApplicationClass.sSharedPreferences.putEmail(it)
+            }
+
+            user.uid.let { //not null값
+                ApplicationClass.sSharedPreferences.putUID(it)
             }
         }
     }
