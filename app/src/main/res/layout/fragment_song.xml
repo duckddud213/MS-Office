@@ -14,7 +14,7 @@
             android:id="@+id/player_view_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:visibility="visible"
             app:constraint_referenced_ids="track_text_view, artist_text_view,
         cover_image_card_view, bottom_background_view,
         player_seek_bar, play_time_text_view, total_time_text_view"
@@ -25,7 +25,7 @@
             android:id="@+id/play_list_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="visible"
+            android:visibility="gone"
             app:constraint_referenced_ids="play_list_recycler_view, title_text_view, play_list_seek_bar" />
 
         <View
@@ -57,6 +57,7 @@
             android:layout_marginTop="30dp"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:text="곡 제목"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -67,7 +68,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:text="재생목록"
+            android:text="곡 제목"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -81,10 +82,11 @@
             android:layout_marginTop="3dp"
             android:textColor="@color/black"
             android:textSize="15sp"
+            android:text="artist"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/track_text_view"
-            tools:text="Genre" />
+            tools:text="artist" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cover_image_card_view"

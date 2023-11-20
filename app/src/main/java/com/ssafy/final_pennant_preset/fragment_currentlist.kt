@@ -143,17 +143,9 @@ class fragment_currentlist : Fragment() {
             return CurrentPlayListViewHolder(view).apply {
                 //클릭 시 해당 곡 재생 기능 추가
                 itemView.setOnClickListener {
-//                    for(i in 0..musicviewmodel.playList.size-1){
-//                        if(musicviewmodel.playList.get(i).playlistname==playlists[layoutPosition].playlistname){
-//                            musicviewmodel.selectedPlaylist=musicviewmodel.playList.get(i)
-//                            requireActivity().apply {
-//                                findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(R.id.btnPlayList).isChecked=false
-//                                findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(R.id.btnCurrentList).isChecked=true
-//                                supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_currentlist()).commit()
-//                            }
-//                            break
-//                        }
-//                    }
+                    musicviewmodel.selectedMusic = songlist[layoutPosition]
+                    musicviewmodel.selectedMusicPosition = layoutPosition
+                    requireActivity().supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_song()).commit()
                 }
             }
         }

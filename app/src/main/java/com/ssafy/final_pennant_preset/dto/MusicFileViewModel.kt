@@ -22,6 +22,8 @@ class MusicFileViewModel:ViewModel() {
 
     var selectedMusic : MusicDTO = MusicDTO(-1,"",-1,"","")
 
+    var selectedMusicPosition : Int = -1
+
     var selectedPlayList : PlayListDTO = PlayListDTO("", mutableListOf<MusicDTO>())
 
     var selectedPlaylistName : String = ""

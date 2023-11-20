@@ -168,15 +168,15 @@ class fragment_totallist : Fragment() {
                 do {
                     val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
                     val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
-                    val albumId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
+                    val albumId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
                     val artist =
-                        it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
-                    val genre = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
+                        it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
+                    val genre = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.GENRE))
 
                     val dto = MusicDTO(id, title, albumId, artist, genre)
 
                     //기본 설정 통화 녹음 파일들 제외
-                    if (!dto.title.contains("통화") && !dto.title.contains("녹음")) {
+                    if (!dto.title.contains("통화") && !dto.title.contains("녹음") && !musicviewmodel.MusicList.contains(dto)) {
                         musicviewmodel.MusicList.add(dto)
                     }
                 } while (it.moveToNext())

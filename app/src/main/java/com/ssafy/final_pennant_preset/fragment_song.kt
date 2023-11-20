@@ -7,7 +7,11 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.transition.Slide
+import android.transition.Transition
+import android.transition.TransitionManager
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +26,7 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerControlView
+import com.google.android.exoplayer2.ui.StyledPlayerControlView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.ssafy.final_pennant.R
@@ -30,20 +35,25 @@ import com.ssafy.final_pennant_preset.config.ApplicationClass
 import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 import com.ssafy.final_pennant_preset.dto.PlayListDTO
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import java.util.concurrent.TimeUnit
 
 
 private const val TAG = "fragment_song_싸피"
+
 class fragment_song : Fragment() {
 
     private var _binding: FragmentSongBinding? = null
     private val binding: FragmentSongBinding
         get() = _binding!!
 
-    private lateinit var player : ExoPlayer
-    private lateinit var list : MutableList<MusicDTO>
+    private lateinit var player: ExoPlayer
+    private lateinit var audioView: PlayerControlView
+    private lateinit var list: MutableList<MusicDTO>
 
-    val musicviewmodel : MusicFileViewModel by activityViewModels()
+    val musicviewmodel: MusicFileViewModel by activityViewModels()
 
     private val updateSeekRunnable = Runnable {
         updateSeek()
@@ -52,6 +62,7 @@ class fragment_song : Fragment() {
     override fun onAttach(context: Context) {
         super.onAttach(context)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -60,7 +71,7 @@ class fragment_song : Fragment() {
             menu.findItem(R.id.btnPlayList).isCheckable = false
             menu.findItem(R.id.btnCurrentList).isCheckable = false
             menu.findItem(R.id.btnConnectServer).isCheckable = false
-            labelVisibilityMode=NavigationBarView.LABEL_VISIBILITY_UNLABELED
+            labelVisibilityMode = NavigationBarView.LABEL_VISIBILITY_UNLABELED
         }
 
         musicviewmodel.selectedPlaylistName = ApplicationClass.sSharedPreferences.getCurSongList()
@@ -70,27 +81,26 @@ class fragment_song : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentSongBinding.inflate(inflater,container,false)
+        _binding = FragmentSongBinding.inflate(inflater, container, false)
 
         list = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
-        musicviewmodel.selectedPlayList = PlayListDTO(musicviewmodel.selectedPlaylistName,list)
+        musicviewmodel.selectedPlayList = PlayListDTO(musicviewmodel.selectedPlaylistName, list)
 
-        var songListAdapter= SongListAdapter(musicviewmodel.selectedPlayList.songlist)
-//        videoView = binding.playerView
-//        player = ExoPlayer.Builder(requireContext()).build()
-//        videoView.player = player
-//
-//        Log.d(TAG, "onCreateView: ${MediaStore.Audio.Media.EXTERNAL_CONTENT_URI}")
-//        var mediaItem = MediaItem.fromUri("${MediaStore.Audio.Media.EXTERNAL_CONTENT_URI}/32")
-//        Log.d(TAG, "onCreateView: ${mediaItem}")
-//
-//        player.setMediaItem(mediaItem)
-////        player.prepare()
-//        player.play()
+        var songListAdapter = SongListAdapter(musicviewmodel.selectedPlayList.songlist)
+
+
+        var playingSong = musicviewmodel.selectedMusic
+        var mediaItem =
+            MediaItem.fromUri("${MediaStore.Audio.Media.EXTERNAL_CONTENT_URI}/${playingSong.id}")
+        player = ExoPlayer.Builder(requireContext()).build()
+        player.setMediaItem(mediaItem)
+
+        audioView = binding.playerView
+        audioView.player = player
 
         binding.apply {
-            playListGroup.isVisible=false
-            playerViewGroup.isVisible=true
+            playListGroup.isVisible = false
+            playerViewGroup.isVisible = true
         }
 
         binding.playListRecyclerView.apply {
@@ -105,14 +115,9 @@ class fragment_song : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.playListImageView.setOnClickListener{
-            binding.playListGroup.isVisible = !binding.playListGroup.isVisible
-            binding.playerViewGroup.isVisible = !binding.playerViewGroup.isVisible
-        }
-
         initPlayerSetting()
         initPlayListButton()
-//        initPlayControlButtons()
+        initPlayControlButtons()
 //        initSeekBar()
 //        initRecyclerView()
 
@@ -139,11 +144,11 @@ class fragment_song : Fragment() {
                 genre.text = music.genre
 
                 var musicImg = MediaMetadataRetriever()
-                musicImg.setDataSource(requireContext(), ContentUris.withAppendedId(uri,music.id))
+                musicImg.setDataSource(requireContext(), ContentUris.withAppendedId(uri, music.id))
                 var insertImg = musicImg.embeddedPicture
 
-                if(insertImg!=null){
-                    var bitmap = BitmapFactory.decodeByteArray(insertImg,0,insertImg.size)
+                if (insertImg != null) {
+                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                     img.setImageBitmap(bitmap)
                 }
 
@@ -208,28 +213,40 @@ class fragment_song : Fragment() {
             TimeUnit.MINUTES.convert(position, TimeUnit.MILLISECONDS), // 현재 분
             (position / 1000) % 60 // 분 단위를 제외한 현재 초
         )
-        binding.totalTimeTextView.text= String.format(
+        binding.totalTimeTextView.text = String.format(
             "%02d:%02d",
             TimeUnit.MINUTES.convert(duration, TimeUnit.MILLISECONDS), // 전체 분
             (duration / 1000) % 60 // 분 단위를 제외한 초
         )
     }
 
-    private fun initPlayerSetting(){
+    private fun initPlayerSetting() {
         context?.let {
             player = ExoPlayer.Builder(it).build()
         }
 
         binding.playerView.player = player
+        var transition : Transition = Slide(Gravity.BOTTOM)
+        transition.duration = 60000
+        transition.addTarget(R.id.player_view)
+        TransitionManager.beginDelayedTransition(R.id.player_view as ViewGroup, transition)
+        if(isVisible){
+            setVisible(false)
+            CoroutineScope(Dispatchers.Main).cancel()
+        }
+        else{
+            setVisible(true)
+//            delayVisibleGone()
+        }
 
-        player?.addListener(object : Player.Listener{
+
+        player?.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 super.onIsPlayingChanged(isPlaying)
 
-                if(isPlaying){
+                if (isPlaying) {
                     binding.playControlImageView.setImageResource(R.drawable.img_pause)
-                }
-                else{
+                } else {
                     binding.playControlImageView.setImageResource(R.drawable.img_play)
                 }
             }
@@ -253,15 +270,75 @@ class fragment_song : Fragment() {
                 updateSeek()
             }
 
-        })
+        }
+        )
     }
 
     private fun initPlayListButton() {
         binding.playListImageView.setOnClickListener {
             // 강의 와는 다르게 구현
-            binding.playListGroup.isVisible = binding.playerViewGroup.isVisible.also {
-                binding.playerViewGroup.isVisible = binding.playListGroup.isVisible
-            }
+            binding.playListGroup.isVisible = !binding.playListGroup.isVisible
+            binding.playerViewGroup.isVisible = !binding.playerViewGroup.isVisible
         }
     }
+
+    private fun initPlayControlButtons() {
+
+        // 재생 or 일시정지 버튼
+        binding.playControlImageView.setOnClickListener {
+            val player = player
+
+            Log.d(TAG, "initPlayControlButtons: ${player.isPlaying}")
+            if (player.isPlaying) {
+                player.pause()
+            } else {
+                player.play()
+            }
+        }
+
+        binding.skipNextImageView.setOnClickListener {
+
+            musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition+1
+            musicviewmodel.selectedMusicPosition =  musicviewmodel.selectedMusicPosition % musicviewmodel.selectedPlayList.songlist.size
+            playMusic(musicviewmodel.selectedMusicPosition)
+        }
+
+        binding.skipPrevImageView.setOnClickListener {
+            musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition-1
+            if(musicviewmodel.selectedMusicPosition<0){
+                musicviewmodel.selectedMusicPosition=musicviewmodel.selectedPlayList.songlist.size-1
+            }
+            playMusic(musicviewmodel.selectedMusicPosition)
+        }
+    }
+
+    private fun playMusic(position : Int) {
+        var mediaItem =
+            MediaItem.fromUri("${MediaStore.Audio.Media.EXTERNAL_CONTENT_URI}/${musicviewmodel.selectedPlayList.songlist[position].id}")
+
+        binding.playerViewGroup.visibility=View.VISIBLE
+
+        player?.setMediaItem(mediaItem,0) // startPositionsMs=0 초 부터 시작
+        player?.play()
+    }
+
+//    private fun setControllerVisible() {
+//        val transition: Transition = Slide(Gravity.BOTTOM)
+//        transition.duration = 600
+//        transition.addTarget(this@BaseControllerView)
+//        TransitionManager.beginDelayedTransition(this@BaseControllerView as ViewGroup, transition)
+//        if (isVisible) {
+//            setVisible(false)
+//            coroutineForCancelAndCreate.cancel()
+//        }
+//        else {
+//            setVisible(true)
+//            delayVisibleGone()
+//        }
+//    }
+//
+//    private fun setVisible(visible:Boolean){
+//        isVisible = visible
+//        binding.playerView.isVisible=visible
+//    }
 }
