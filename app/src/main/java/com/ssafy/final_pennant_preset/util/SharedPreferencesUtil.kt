@@ -51,6 +51,16 @@ class SharedPreferencesUtil(context: Context) {
         return preferences.getString("userUID", null)
     }
 
+    fun putNotification(genre: String, isPush: Boolean) {
+        val editor = preferences.edit()
+        editor.putBoolean(genre, isPush)
+        editor.apply()
+    }
+
+    fun getNotification(genre: String): Boolean{
+        return preferences.getBoolean(genre, true)
+    }
+
     /**
      * param: 재생목록의 이름, 해당하는 재생목록의 MutableList<MusicDto>
      * return: 저장 여부(중복된 재생목록이 있는 경우)

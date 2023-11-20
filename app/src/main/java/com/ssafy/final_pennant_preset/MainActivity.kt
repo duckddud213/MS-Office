@@ -91,12 +91,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         checkLogin()
-
-        createNotificationChannel(CHANNEL_BALLAD, "ssafy")
-        createNotificationChannel(CHANNEL_DANCE, "ssafy")
-        createNotificationChannel(CHANNEL_IDOL, "ssafy")
-        createNotificationChannel(CHANNEL_POP, "ssafy")
-        createNotificationChannel(CHANNEL_ROCK, "ssafy")
+        initNotificationChannel()
     }
 
     // firebase 로그인 관련
@@ -225,10 +220,18 @@ class MainActivity : AppCompatActivity() {
 
 
     @RequiresApi(Build.VERSION_CODES.O)
+    fun initNotificationChannel() {
+        createNotificationChannel(ApplicationClass.CHANNEL_DANCE, ApplicationClass.CHANNEL_DANCE)
+        createNotificationChannel(ApplicationClass.CHANNEL_IDOL, ApplicationClass.CHANNEL_IDOL)
+        createNotificationChannel(ApplicationClass.CHANNEL_BALLAD, ApplicationClass.CHANNEL_BALLAD)
+        createNotificationChannel(ApplicationClass.CHANNEL_ROCK, ApplicationClass.CHANNEL_ROCK)
+        createNotificationChannel(ApplicationClass.CHANNEL_POP , ApplicationClass.CHANNEL_POP)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(id: String, name: String) {
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(id, name, importance)
-
         val notificationManager: NotificationManager
                 = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
@@ -236,22 +239,19 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val RC_SIGN_IN = 9001
-        val CHANNEL = arrayOf("channel_dance", "channel_rock", "channel_ballad", "channel_pop", "channel_idol")
-        const val CHANNEL_DANCE = "channel_dance"
-        const val CHANNEL_ROCK = "channel_rock"
-        const val CHANNEL_BALLAD = "channel_ballad"
-        const val CHANNEL_POP = "channel_pop"
-        const val CHANNEL_IDOL = "channel_idol"
 
         // main에 1개
         // firebaseservice에 1개 주석 처리되있음
         fun uploadToken(token:String){
             // 새로운 토큰 수신 시 서버로 전송
             val service = ApplicationClass.sRetrofit.create(FirebaseTokenService::class.java)
-            val userUID = ApplicationClass.sSharedPreferences.getUID()!!
+
+            val userUID = ApplicationClass.sSharedPreferences.getUID() ?: return
+
             Log.d(TAG, "uploadToken: token: $token")
             Log.d(TAG, "uploadToken: uid : $userUID")
-            service.uploadToken(token, userUID).enqueue(object : Callback<String> {
+
+            service.uploadToken(userUID, token).enqueue(object : Callback<String> {
                 override fun onResponse(call: Call<String>, response: Response<String>) {
                     if(response.isSuccessful){
                         val res = response.body()

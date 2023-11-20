@@ -30,6 +30,19 @@ class ApplicationClass : Application() {
 
         const val X_ACCESS_TOKEN = "X-ACC  ESS-TOKEN"
         const val COOKIES_KEY_NAME = "cookies"
+
+
+        const val CHANNEL_DANCE = "dance"
+        const val CHANNEL_BALLAD = "ballad"
+        const val CHANNEL_IDOL = "idol"
+        const val CHANNEL_POP = "pop"
+        const val CHANNEL_ROCK = "rock"
+
+        var receive_notification_ballad = true
+        var receive_notification_dance = true
+        var receive_notification_rock = true
+        var receive_notification_pop = true
+        var receive_notification_idol = true
     }
 
     override fun onCreate() {
@@ -39,6 +52,7 @@ class ApplicationClass : Application() {
         sSharedPreferences = SharedPreferencesUtil(applicationContext)
         // 레트로핏 인스턴스 생성
         initRetrofitInstance()
+        initNotificationChannel()
     }
 
     // 레트로핏 인스턴스를 생성하고, 레트로핏에 각종 설정값들을 지정해줍니다.
@@ -59,5 +73,13 @@ class ApplicationClass : Application() {
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    private fun initNotificationChannel() {
+        receive_notification_ballad = sSharedPreferences.getNotification(CHANNEL_BALLAD)
+        receive_notification_dance = sSharedPreferences.getNotification(CHANNEL_DANCE)
+        receive_notification_rock = sSharedPreferences.getNotification(CHANNEL_ROCK)
+        receive_notification_pop = sSharedPreferences.getNotification(CHANNEL_POP)
+        receive_notification_idol = sSharedPreferences.getNotification(CHANNEL_IDOL)
     }
 }

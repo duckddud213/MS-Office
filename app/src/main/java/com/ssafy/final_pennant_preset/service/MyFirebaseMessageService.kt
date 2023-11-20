@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant_preset.MainActivity
 import com.ssafy.final_pennant_preset.config.ApplicationClass
 
@@ -26,12 +27,15 @@ class MyFirebaseMessageService : FirebaseMessagingService() {
         MainActivity.uploadToken(token)
     }
 
+    lateinit var builder : NotificationCompat.Builder
+
     // Foreground, Background 모두 처리하기 위해서는 data에 값을 담아서 넘긴다.
     //https://firebase.google.com/docs/cloud-messaging/android/receive
     @SuppressLint("LongLogTag")
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         var messageTitle = ""
         var messageContent = ""
+        var messageGenre = ""
 
         if(remoteMessage.notification != null){ // notification이 있는 경우 foreground처리
             //foreground
@@ -46,20 +50,61 @@ class MyFirebaseMessageService : FirebaseMessagingService() {
 
             messageTitle = data.get("title").toString()
             messageContent = data.get("body").toString()
+            messageGenre = data.get("genre").toString()
+            Log.d(TAG, "onMessageReceived: $messageGenre")
         }
 
         val mainIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
-        val mainPendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_IMMUTABLE)
+        val mainPendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_MUTABLE)
+        var channelId = 100
+        when(messageGenre) {
 
-        val builder_dance = NotificationCompat.Builder(this, MainActivity.CHANNEL_DANCE)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(messageTitle)
-            .setContentText(messageContent)
-            .setAutoCancel(true)
-            .setContentIntent(mainPendingIntent)
+            ApplicationClass.CHANNEL_DANCE -> {
+                if (!ApplicationClass.receive_notification_dance) return
+
+                builder = NotificationCompat.Builder(this, ApplicationClass.CHANNEL_DANCE)
+                    .setSmallIcon(R.drawable.noti_dance)
+                channelId = 101
+            }
+
+            ApplicationClass.CHANNEL_BALLAD -> {
+                if (!ApplicationClass.receive_notification_ballad) return
+                builder = NotificationCompat.Builder(this, ApplicationClass.CHANNEL_BALLAD)
+                    .setSmallIcon(R.drawable.noti_ballad)
+                channelId = 102
+            }
+
+            ApplicationClass.CHANNEL_IDOL -> {
+                if (!ApplicationClass.receive_notification_idol) return
+                builder = NotificationCompat.Builder(this, ApplicationClass.CHANNEL_IDOL)
+                    .setSmallIcon(R.drawable.noti_idol)
+                channelId = 103
+            }
+
+            ApplicationClass.CHANNEL_POP -> {
+                if (!ApplicationClass.receive_notification_pop) return
+                builder = NotificationCompat.Builder(this, ApplicationClass.CHANNEL_POP)
+                    .setSmallIcon(R.drawable.noti_pop)
+                channelId = 104
+            }
+
+            ApplicationClass.CHANNEL_ROCK -> {
+                if (!ApplicationClass.receive_notification_rock) return
+                builder = NotificationCompat.Builder(this, ApplicationClass.CHANNEL_ROCK)
+                    .setSmallIcon(R.drawable.noti_rock)
+                channelId = 105
+            }
+
+            else -> return
+        }
+
+        builder.setContentTitle(messageTitle)
+                .setContentText(messageContent)
+                .setAutoCancel(true)
+                .setContentIntent(mainPendingIntent)
 
         NotificationManagerCompat.from(applicationContext).apply {
             if (ActivityCompat.checkSelfPermission(
@@ -69,7 +114,8 @@ class MyFirebaseMessageService : FirebaseMessagingService() {
             ) {
                 return
             }
-            notify(101, builder_dance.build())
+            notify(channelId, builder.build())
         }
+
     }
 }
