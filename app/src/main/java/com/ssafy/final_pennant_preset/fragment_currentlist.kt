@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -123,6 +124,7 @@ class fragment_currentlist : Fragment() {
                                 Log.d(TAG, "onCreateContextMenu: ${musicviewmodel.selectedPlaylistName} // ${songlist[layoutPosition].title}")
                                 Log.d(TAG, "onCreateContextMenu: ${layoutPosition}")
                                 binding.rvCurrentPlayList.adapter!!.notifyItemRemoved(layoutPosition)
+                                ApplicationClass.sSharedPreferences.putSelectedSongPosition(layoutPosition)
                                 list = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
                                 musicviewmodel.selectedPlayList.songlist.removeAt(layoutPosition)
                                 Log.d(TAG, "onCreateContextMenu: list size : ${list.size}")
@@ -145,7 +147,11 @@ class fragment_currentlist : Fragment() {
                 itemView.setOnClickListener {
                     musicviewmodel.selectedMusic = songlist[layoutPosition]
                     musicviewmodel.selectedMusicPosition = layoutPosition
-                    requireActivity().supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_song()).commit()
+                    ApplicationClass.sSharedPreferences.putSelectedSongPosition(layoutPosition)
+                    requireActivity().apply {
+                        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                        supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_song()).commit()
+                    }
                 }
             }
         }

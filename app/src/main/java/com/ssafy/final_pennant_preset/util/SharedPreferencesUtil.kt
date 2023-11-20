@@ -13,6 +13,7 @@ class SharedPreferencesUtil(context: Context) {
 
     private val KEY_SONG_LIST_NAME = "songListName"
     private val KEY_CUR_SONG_LIST = "curSongList"
+    private val KEY_SELECTED_SONG_POSITION = "selectedSongPosition"
 
     private var preferences: SharedPreferences =
         context.getSharedPreferences(ApplicationClass.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
@@ -213,4 +214,22 @@ class SharedPreferencesUtil(context: Context) {
         editor.putString(KEY_SONG_LIST_NAME, newSongList)
         editor.apply()
     }
+
+    /**
+     * 재생 중인 곡의 해당 재생목록에서의 위치 저장
+     */
+
+    fun putSelectedSongPosition(position:Int){
+        val editor = preferences.edit()
+        editor.putString(KEY_SELECTED_SONG_POSITION,position.toString())
+        editor.apply()
+        Log.d(TAG, "putSelectedSongPosition: ${preferences.getString(KEY_SELECTED_SONG_POSITION,null)}")
+    }
+
+    fun getSelectedSongPosition() : Int{
+        val selectedSongPosition = preferences.getString(KEY_SELECTED_SONG_POSITION,null)
+        return selectedSongPosition?.toInt() ?: -1
+    }
+
+
 }

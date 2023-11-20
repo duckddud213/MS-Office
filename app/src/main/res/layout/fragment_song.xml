@@ -68,7 +68,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
-            android:text="곡 제목"
+            android:text="현재 재생 목록"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -85,8 +85,7 @@
             android:text="artist"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/track_text_view"
-            tools:text="artist" />
+            app:layout_constraintTop_toBottomOf="@id/track_text_view" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cover_image_card_view"

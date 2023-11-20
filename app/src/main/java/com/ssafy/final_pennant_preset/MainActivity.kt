@@ -78,13 +78,13 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             btnPlay.setOnClickListener {
+                supportFragmentManager.popBackStack(null,FragmentManager.POP_BACK_STACK_INCLUSIVE)
                 bottomNavView.menu.findItem(R.id.btnTotalFile).isCheckable = false
                 bottomNavView.menu.findItem(R.id.btnPlayList).isCheckable = false
                 bottomNavView.menu.findItem(R.id.btnCurrentList).isCheckable = false
                 bottomNavView.menu.findItem(R.id.btnConnectServer).isCheckable = false
                 bottomNavView.labelVisibilityMode =NavigationBarView.LABEL_VISIBILITY_UNLABELED
 
-                supportFragmentManager.popBackStack(null,FragmentManager.POP_BACK_STACK_INCLUSIVE)
                 supportFragmentManager.beginTransaction().replace(R.id.framecontainer,fragment_song()).commit()
             }
         }
