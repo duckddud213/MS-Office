@@ -65,17 +65,7 @@ class SharedPreferencesUtil(context: Context) {
     fun putSongList(
         playListName: String,
         songList: MutableList<MusicDTO>,
-//        isModify: Boolean
     ) {
-
-//        if (!isModify) { // 새로 만드는 경우
-//            if (preferences.contains(playListName)) return false
-//            // 기존에 저장된 재생목록이 있다면 return false
-//        }
-
-//        if(preferences.contains(playListName)){
-//            preferences.
-//        }
 
         val editor = preferences.edit()
         val sb = StringBuilder()
@@ -101,11 +91,14 @@ class SharedPreferencesUtil(context: Context) {
         songStr?.let {
             val songArr = it.split("&&") // 하나의 MusicDTO를 가져옴
             for (song in songArr) {
-                if(song.equals("")){
+                if (song.equals("")) {
                     break
                 }
                 var element = song.split("||") // 하나의 MusicDTO 안의 요소들을 가져옴
-                Log.d(TAG, "getSongList: ${element[0]} / ${element[1]} / ${element[2]} / ${element[3]} / ${element[4]} / ")
+                Log.d(
+                    TAG,
+                    "getSongList: ${element[0]} / ${element[1]} / ${element[2]} / ${element[3]} / ${element[4]} / "
+                )
                 songList.add(
                     MusicDTO(
                         element[0].toLong(),
@@ -117,17 +110,38 @@ class SharedPreferencesUtil(context: Context) {
         return songList
     }
 
+    fun deleteSongFromList(playListName: String, songInfo: MusicDTO) {
+        val songListStr = preferences.getString(playListName,null)
+        var newSongListStr :String = ""
+        val editor = preferences.edit()
+
+        songListStr?.let {
+            val songItem = it.split("&&")
+            for(song in songItem){
+                if (song.equals("")) {
+                    break
+                }
+                var element = song.split("||") // 하나의 MusicDTO 안의 요소들을 가져옴
+                Log.d(TAG, "deleteSongFromList: ${element[0]} / ${element[1]} / ${element[2]} / ${element[3]} / ${element[4]}")
+
+                if(!songInfo.equals(MusicDTO(element[0].toLong(),element[1],element[2].toLong(),element[3],element[4]))){
+                    newSongListStr+=song
+                }
+            }
+        }
+        
+        editor.putString(playListName,newSongListStr)
+        editor.apply()
+    }
+
     /**
      * 현재 재생 목록을 저장하는 함수
      */
-//    fun putCurSongList(songList: MutableList<MusicDTO>) {
-//        putSongList(KEY_CUR_SONG_LIST, songList)
-//    }
 
-    fun putCurSongList(songListName : String){
+    fun putCurSongList(songListName: String) {
         val editor = preferences.edit()
 
-        editor.putString(KEY_CUR_SONG_LIST,songListName)
+        editor.putString(KEY_CUR_SONG_LIST, songListName)
         editor.apply()
     }
 
@@ -135,14 +149,10 @@ class SharedPreferencesUtil(context: Context) {
     /**
      * 현재 재생 목록을 반환
      */
-//    fun getCurSongList(): MutableList<MusicDTO> {
-//        return getSongList(KEY_CUR_SONG_LIST)
-//    }
+    fun getCurSongList(): String {
+        val songListName = preferences.getString(KEY_CUR_SONG_LIST, null)
 
-    fun getCurSongList():String{
-        val songListName = preferences.getString(KEY_CUR_SONG_LIST,null)
-
-        return songListName?:""
+        return songListName ?: ""
     }
 
     /**
@@ -183,7 +193,7 @@ class SharedPreferencesUtil(context: Context) {
             val names = it.split("&&")
             for (name in names) {
                 Log.d(TAG, "deleteSongListName: name : ${name}")
-                if (!name.equals(deletedSongListName)&&!name.equals("")) {
+                if (!name.equals(deletedSongListName) && !name.equals("")) {
                     newSongList += "${name}&&"
                 }
             }
