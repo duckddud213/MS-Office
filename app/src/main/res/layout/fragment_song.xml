@@ -143,7 +143,7 @@
             android:paddingStart="0dp"
             android:paddingEnd="0dp"
             android:progressDrawable="@drawable/player_seek_background"
-            android:thumb="@drawable/player_seek_thumb"
+            android:thumb="@drawable/img_note"
             app:layout_constraintBottom_toTopOf="@id/player_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
