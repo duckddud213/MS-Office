@@ -27,9 +27,11 @@ import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.ActivityMainBinding
 import com.ssafy.final_pennant_preset.config.ApplicationClass
 import com.ssafy.final_pennant_preset.service.FirebaseTokenService
+import com.ssafy.final_pennant_preset.util.RetrofitUtil
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
 
 private const val TAG = "MainActivity_싸피"
 class MainActivity : AppCompatActivity() {
@@ -182,13 +184,6 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "파일 업로드를 위해 로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
             Log.d(TAG, "updateUI 실패")
         } else {
-//            Log.d(TAG, "updateUI1: ${user.tenantId}")
-//            Log.d(TAG, "updateUI2: ${user.uid}")
-//            Log.d(TAG, "updateUI3: ${user.email}")
-//            Log.d(TAG, "updateUI4: ${user.displayName}")
-//            Log.d(TAG, "updateUI5: ${user.photoUrl}")
-//            Log.d(TAG, "updateUI5: ${user.phoneNumber}")
-//            Log.d(TAG, "updateUI6: ${user.providerId}")
 
             user.email?.let {
                 ApplicationClass.sSharedPreferences.putEmail(it)
@@ -244,14 +239,14 @@ class MainActivity : AppCompatActivity() {
         // firebaseservice에 1개 주석 처리되있음
         fun uploadToken(token:String){
             // 새로운 토큰 수신 시 서버로 전송
-            val service = ApplicationClass.sRetrofit.create(FirebaseTokenService::class.java)
+            val tokenService = RetrofitUtil.firebaseTokenService
 
             val userUID = ApplicationClass.sSharedPreferences.getUID() ?: return
 
             Log.d(TAG, "uploadToken: token: $token")
             Log.d(TAG, "uploadToken: uid : $userUID")
 
-            service.uploadToken(userUID, token).enqueue(object : Callback<String> {
+            tokenService.uploadToken(userUID, token).enqueue(object : Callback<String> {
                 override fun onResponse(call: Call<String>, response: Response<String>) {
                     if(response.isSuccessful){
                         val res = response.body()
