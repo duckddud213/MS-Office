@@ -121,13 +121,19 @@ class fragment_currentlist : Fragment() {
                             builder.setCancelable(true)
                             builder.setPositiveButton("삭제") { _, _ ->
                                 ApplicationClass.sSharedPreferences.deleteSongFromList(musicviewmodel.selectedPlaylistName,songlist[layoutPosition])
-                                Log.d(TAG, "onCreateContextMenu: ${musicviewmodel.selectedPlaylistName} // ${songlist[layoutPosition].title}")
-                                Log.d(TAG, "onCreateContextMenu: ${layoutPosition}")
-                                binding.rvCurrentPlayList.adapter!!.notifyItemRemoved(layoutPosition)
-                                ApplicationClass.sSharedPreferences.putSelectedSongPosition(layoutPosition)
-                                list = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
                                 musicviewmodel.selectedPlayList.songlist.removeAt(layoutPosition)
-                                Log.d(TAG, "onCreateContextMenu: list size : ${list.size}")
+                                list = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
+                                musicviewmodel.selectedPlayList = PlayListDTO(musicviewmodel.selectedPlaylistName,list)
+                                binding.rvCurrentPlayList.adapter!!.notifyItemRemoved(layoutPosition)
+                                if(musicviewmodel.selectedMusicPosition==layoutPosition){
+                                    //재생 중이던 곡이 삭제된 경우 => 다음곡으로 넘김
+//                                    musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition
+                                    musicviewmodel.selectedMusicPosition %= musicviewmodel.selectedPlayList.songlist.size
+
+                                    ApplicationClass.sSharedPreferences.putSelectedSongPosition(musicviewmodel.selectedMusicPosition)
+                                }
+
+
                             }
                             builder.setNegativeButton(
                                 "취소"

@@ -167,11 +167,11 @@ class fragment_totallist : Fragment() {
             if (it.moveToFirst()) {
                 do {
                     val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID))
-                    val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))
+                    val title = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE))?:"unknown title"
                     val albumId = it.getLong(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))
                     val artist =
-                        it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))
-                    val genre = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.GENRE))
+                        it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST))?:"unknown artist"
+                    val genre = it.getString(it.getColumnIndexOrThrow(MediaStore.Audio.Media.GENRE))?:"genre"
 
                     val dto = MusicDTO(id, title, albumId, artist, genre)
 

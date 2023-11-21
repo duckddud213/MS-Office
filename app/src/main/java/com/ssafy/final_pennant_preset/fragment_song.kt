@@ -36,18 +36,19 @@ import com.ssafy.final_pennant_preset.dto.PlayListDTO
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "fragment_song_싸피"
+
 class fragment_song : Fragment() {
 
-    private var _binding:FragmentSongBinding ?= null
-    private val binding : FragmentSongBinding
+    private var _binding: FragmentSongBinding? = null
+    private val binding: FragmentSongBinding
         get() = _binding!!
-    private lateinit var songlistadapter:SongListAdapter
+    private lateinit var songlistadapter: SongListAdapter
 
-    val musicviewmodel : MusicFileViewModel by activityViewModels()
+    val musicviewmodel: MusicFileViewModel by activityViewModels()
     var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
     private lateinit var player: ExoPlayer
-    private lateinit var list: MutableList<MusicDTO>
-    lateinit var mediaItem : MediaItem
+    private var list = mutableListOf<MusicDTO>()
+    lateinit var mediaItem: MediaItem
 
     private val updateSeekRunnable = Runnable {
         updateSeek()
@@ -56,7 +57,10 @@ class fragment_song : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        requireActivity().supportFragmentManager.popBackStack(
+            null,
+            FragmentManager.POP_BACK_STACK_INCLUSIVE
+        )
         requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavView).apply {
             menu.findItem(R.id.btnTotalFile).isCheckable = false
             menu.findItem(R.id.btnPlayList).isCheckable = false
@@ -64,13 +68,6 @@ class fragment_song : Fragment() {
             menu.findItem(R.id.btnConnectServer).isCheckable = false
             labelVisibilityMode = NavigationBarView.LABEL_VISIBILITY_UNLABELED
         }
-
-        musicviewmodel.selectedPlaylistName = ApplicationClass.sSharedPreferences.getCurSongList()
-        list = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
-        musicviewmodel.selectedMusicPosition = ApplicationClass.sSharedPreferences.getSelectedSongPosition()
-        musicviewmodel.selectedMusic = list.get(musicviewmodel.selectedMusicPosition)
-        Log.d(TAG, "onCreate: 선택한 음악 : ${musicviewmodel.selectedMusic}")
-        musicviewmodel.selectedPlaylistName = ApplicationClass.sSharedPreferences.getCurSongList()
     }
 
     override fun onCreateView(
@@ -80,22 +77,47 @@ class fragment_song : Fragment() {
     ): View? {
         _binding = FragmentSongBinding.inflate(inflater, container, false)
 
-        musicviewmodel.selectedPlayList = PlayListDTO(musicviewmodel.selectedPlaylistName, list)
+        musicviewmodel.selectedPlaylistName = ApplicationClass.sSharedPreferences.getCurSongList()
+        musicviewmodel.selectedMusicPosition =
+            ApplicationClass.sSharedPreferences.getSelectedSongPosition()
+        Log.d(
+            TAG,
+            "onCreateView: ${musicviewmodel.selectedPlaylistName} / ${musicviewmodel.selectedMusicPosition}"
+        )
+        if (musicviewmodel.selectedPlaylistName == "") {
+            //재생목록이 삭제된 경우 =>selectedPosition도 -1
 
-        songlistadapter = SongListAdapter(musicviewmodel.selectedPlayList.songlist)
+        } else {
+            //재생목록이 있는 경우
+            list =
+                ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
 
-        binding.trackTextView.text = musicviewmodel.selectedMusic.title
-        binding.artistTextView.text=musicviewmodel.selectedMusic.artist
+            if (musicviewmodel.selectedMusicPosition != -1 && musicviewmodel.selectedMusicPosition<musicviewmodel.selectedPlayList.songlist.size) {
+                musicviewmodel.selectedMusic = list.get(musicviewmodel.selectedMusicPosition)
+                Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic}")
+                binding.trackTextView.text = musicviewmodel.selectedMusic.title
+                binding.artistTextView.text = musicviewmodel.selectedMusic.artist
 
-
-        var musicImg = MediaMetadataRetriever()
-        Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
-        musicImg.setDataSource(requireContext(),ContentUris.withAppendedId(uri,musicviewmodel.selectedMusic.id))
-        var insertImg = musicImg.embeddedPicture
-        if(insertImg!=null){
-            var bitmap = BitmapFactory.decodeByteArray(insertImg,0,insertImg.size)
-            binding.coverImageView.setImageBitmap(bitmap)
+                var musicImg = MediaMetadataRetriever()
+                musicImg.setDataSource(
+                    requireContext(),
+                    ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+                )
+                var insertImg = musicImg.embeddedPicture
+                if (insertImg != null) {
+                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+                    binding.coverImageView.setImageBitmap(bitmap)
+                }
+            }
+            else {
+                //선택한 곡이 없는 경우
+                binding.trackTextView.text = "재생할 곡을 선택해주세요"
+                binding.artistTextView.text = ""
+                binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+            }
         }
+        musicviewmodel.selectedPlayList = PlayListDTO(musicviewmodel.selectedPlaylistName, list)
+        songlistadapter = SongListAdapter(musicviewmodel.selectedPlayList.songlist)
 
         return binding.root
     }
@@ -104,16 +126,8 @@ class fragment_song : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         player = ExoPlayer.Builder(requireContext()).build()
-        binding.playerView.showTimeoutMs=0
+        binding.playerView.showTimeoutMs = 0
         binding.playerView.player = player
-
-        Log.d(TAG, "onViewCreated: selectedMusicPosition : ${musicviewmodel.selectedMusicPosition}")
-        Log.d(TAG, "onViewCreated: ${musicviewmodel.selectedPlayList.songlist.size}")
-        mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition].id}")
-        player.setMediaItem(mediaItem,0)
-        binding.playControlImageView.setImageResource(R.drawable.img_pause)
-        player.prepare()
-        player.play()
 
         binding.playListRecyclerView.apply {
             adapter = adapter
@@ -121,17 +135,31 @@ class fragment_song : Fragment() {
             addItemDecoration(CustomItemDecoration())
         }
 
-        binding.playControlImageView.setOnClickListener {
-            if(player.isPlaying){
-                player.pause()
-                Log.d(TAG, "onViewCreated: here?")
-                binding.playControlImageView.setImageResource(R.drawable.img_play)
+        if (musicviewmodel.selectedMusicPosition != -1 && musicviewmodel.selectedPlaylistName != "" && musicviewmodel.selectedMusic.id.toInt()!=-1) {
+            //재생할 곡 player 연결
+
+            Log.d(TAG, "onViewCreated: ${musicviewmodel.selectedMusic}")
+            binding.trackTextView.text = musicviewmodel.selectedMusic.title
+            binding.artistTextView.text = musicviewmodel.selectedMusic.artist
+
+            var musicImg = MediaMetadataRetriever()
+            musicImg.setDataSource(
+                requireContext(),
+                ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+            )
+            var insertImg = musicImg.embeddedPicture
+            if (insertImg != null) {
+                var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+                binding.coverImageView.setImageBitmap(bitmap)
             }
-            else{
-                player.setMediaItem(mediaItem,0)
-                player.play()
-                binding.playControlImageView.setImageResource(R.drawable.img_pause)
-            }
+
+            mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
+            player.setMediaItem(mediaItem, 0)
+            binding.playControlImageView.setImageResource(R.drawable.img_pause)
+            player.prepare()
+            player.play()
+
+
         }
 
         initPlayView()
@@ -178,20 +206,27 @@ class fragment_song : Fragment() {
                 //곡 클릭시 해당 곡으로 새로 실행
 
                 itemView.setOnClickListener {
-                    Toast.makeText(requireContext(),"${songList[layoutPosition].title}을/를 재생합니다.",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "${songList[layoutPosition].title}을/를 재생합니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     ApplicationClass.sSharedPreferences.putSelectedSongPosition(layoutPosition)
-                    musicviewmodel.selectedMusicPosition=layoutPosition
-                    musicviewmodel.selectedMusic=musicviewmodel.selectedPlayList.songlist.get(layoutPosition)
+                    musicviewmodel.selectedMusicPosition = layoutPosition
+                    musicviewmodel.selectedMusic =
+                        musicviewmodel.selectedPlayList.songlist.get(layoutPosition)
 
                     //player view 전환
                     binding.trackTextView.text = musicviewmodel.selectedMusic.title
-                    binding.artistTextView.text=musicviewmodel.selectedMusic.artist
+                    binding.artistTextView.text = musicviewmodel.selectedMusic.artist
                     var musicImg = MediaMetadataRetriever()
-                    Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
-                    musicImg.setDataSource(requireContext(),ContentUris.withAppendedId(uri,musicviewmodel.selectedMusic.id))
+                    musicImg.setDataSource(
+                        requireContext(),
+                        ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+                    )
                     var insertImg = musicImg.embeddedPicture
-                    if(insertImg!=null){
-                        var bitmap = BitmapFactory.decodeByteArray(insertImg,0,insertImg.size)
+                    if (insertImg != null) {
+                        var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                         binding.coverImageView.setImageBitmap(bitmap)
                     }
 
@@ -199,8 +234,9 @@ class fragment_song : Fragment() {
                         binding.playerViewGroup.isVisible = binding.playListGroup.isVisible
                     }
 
-                    mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition].id}")
-                    player.setMediaItem(mediaItem,0)
+                    mediaItem =
+                        MediaItem.fromUri("${uri}/${musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition].id}")
+                    player.setMediaItem(mediaItem, 0)
                     player.prepare()
                     player.play()
                 }
@@ -219,7 +255,7 @@ class fragment_song : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initSeekBar() {
-        binding.playerSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
+        binding.playerSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
             }
 
@@ -229,7 +265,6 @@ class fragment_song : Fragment() {
             override fun onStopTrackingTouch(seekBar: SeekBar) {
                 player.seekTo(seekBar.progress * 1000L)
             }
-
         })
     }
 
@@ -240,31 +275,38 @@ class fragment_song : Fragment() {
             if (player.isPlaying) {
                 Log.d(TAG, "initPlayControlButtons: player.isPlaying")
                 player.pause()
+                binding.playControlImageView.setImageResource(R.drawable.img_play)
             } else {
                 Log.d(TAG, "initPlayControlButtons: player.isNotPlaying")
                 player.play()
+                binding.playControlImageView.setImageResource(R.drawable.img_pause)
             }
         }
 
         binding.skipNextImageView.setOnClickListener {
-            musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition+1
-            musicviewmodel.selectedMusicPosition =  musicviewmodel.selectedMusicPosition % musicviewmodel.selectedPlayList.songlist.size
+            musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition + 1
+            musicviewmodel.selectedMusicPosition =
+                musicviewmodel.selectedMusicPosition % musicviewmodel.selectedPlayList.songlist.size
 
-            musicviewmodel.selectedMusic = musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition]
-            binding.trackTextView.text=musicviewmodel.selectedMusic.title
-            binding.artistTextView.text=musicviewmodel.selectedMusic.artist
+            musicviewmodel.selectedMusic =
+                musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition]
+            binding.trackTextView.text = musicviewmodel.selectedMusic.title
+            binding.artistTextView.text = musicviewmodel.selectedMusic.artist
 
             var musicImg = MediaMetadataRetriever()
             Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
-            musicImg.setDataSource(requireContext(),ContentUris.withAppendedId(uri,musicviewmodel.selectedMusic.id))
+            musicImg.setDataSource(
+                requireContext(),
+                ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+            )
             var insertImg = musicImg.embeddedPicture
-            if(insertImg!=null){
-                var bitmap = BitmapFactory.decodeByteArray(insertImg,0,insertImg.size)
+            if (insertImg != null) {
+                var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                 binding.coverImageView.setImageBitmap(bitmap)
             }
 
-            if(binding.playListGroup.isVisible) {
-                binding.playListGroup.isVisible=!binding.playListGroup.isVisible
+            if (binding.playListGroup.isVisible) {
+                binding.playListGroup.isVisible = !binding.playListGroup.isVisible
             }
 
             playMusic(musicviewmodel.selectedMusicPosition)
@@ -272,21 +314,26 @@ class fragment_song : Fragment() {
         }
 
         binding.skipPrevImageView.setOnClickListener {
-            musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition-1
-            if(musicviewmodel.selectedMusicPosition<0){
-                musicviewmodel.selectedMusicPosition=musicviewmodel.selectedPlayList.songlist.size-1
+            musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition - 1
+            if (musicviewmodel.selectedMusicPosition < 0) {
+                musicviewmodel.selectedMusicPosition =
+                    musicviewmodel.selectedPlayList.songlist.size - 1
             }
 
-            musicviewmodel.selectedMusic = musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition]
-            binding.trackTextView.text=musicviewmodel.selectedMusic.title
-            binding.artistTextView.text=musicviewmodel.selectedMusic.artist
+            musicviewmodel.selectedMusic =
+                musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition]
+            binding.trackTextView.text = musicviewmodel.selectedMusic.title
+            binding.artistTextView.text = musicviewmodel.selectedMusic.artist
 
             var musicImg = MediaMetadataRetriever()
             Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
-            musicImg.setDataSource(requireContext(),ContentUris.withAppendedId(uri,musicviewmodel.selectedMusic.id))
+            musicImg.setDataSource(
+                requireContext(),
+                ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+            )
             var insertImg = musicImg.embeddedPicture
-            if(insertImg!=null){
-                var bitmap = BitmapFactory.decodeByteArray(insertImg,0,insertImg.size)
+            if (insertImg != null) {
+                var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                 binding.coverImageView.setImageBitmap(bitmap)
             }
 
@@ -303,13 +350,6 @@ class fragment_song : Fragment() {
 
                 Log.d(TAG, "onMediaItemTransition: ${mediaItem?.mediaId}")
                 val newIndex: String = mediaItem?.mediaId ?: return
-//                model.currentPosition = newIndex.toInt()
-//                adapter.submitList(model.getAdapterModels())
-
-                // 리사이클러 뷰 스크롤 이동
-//                binding.playListRecyclerView.scrollToPosition(model.currentPosition)
-//
-//                updatePlayerView(model.currentMusicModel())
             }
 
             // 재생, 재생완료, 버퍼링 상태 ...
@@ -351,11 +391,42 @@ class fragment_song : Fragment() {
             TimeUnit.MINUTES.convert(position, TimeUnit.MILLISECONDS), // 현재 분
             (position / 1000) % 60 // 분 단위를 제외한 현재 초
         )
-        binding.totalTimeTextView.text= String.format(
+        binding.totalTimeTextView.text = String.format(
             "%02d:%02d",
             TimeUnit.MINUTES.convert(duration, TimeUnit.MILLISECONDS), // 전체 분
             (duration / 1000) % 60 // 분 단위를 제외한 초
         )
+
+        if (binding.playTimeTextView.text.equals(binding.totalTimeTextView.text) && !binding.playTimeTextView.text.equals("00:00")) {
+            Log.d(TAG, "updateSeekUi: ")
+
+            musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition + 1
+            musicviewmodel.selectedMusicPosition =
+                musicviewmodel.selectedMusicPosition % musicviewmodel.selectedPlayList.songlist.size
+
+            musicviewmodel.selectedMusic =
+                musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition]
+            binding.trackTextView.text = musicviewmodel.selectedMusic.title
+            binding.artistTextView.text = musicviewmodel.selectedMusic.artist
+
+            var musicImg = MediaMetadataRetriever()
+            Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
+            musicImg.setDataSource(
+                requireContext(),
+                ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+            )
+            var insertImg = musicImg.embeddedPicture
+            if (insertImg != null) {
+                var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+                binding.coverImageView.setImageBitmap(bitmap)
+            }
+
+            if (binding.playListGroup.isVisible) {
+                binding.playListGroup.isVisible = !binding.playListGroup.isVisible
+            }
+
+            playMusic(musicviewmodel.selectedMusicPosition)
+        }
     }
 
     private fun updatePlayerView(music: MusicDTO) {
@@ -367,17 +438,17 @@ class fragment_song : Fragment() {
 //            .into(binding.coverImageView)
         var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         var musicImg = MediaMetadataRetriever()
-        musicImg.setDataSource(requireContext(),ContentUris.withAppendedId(uri,music.id))
+        musicImg.setDataSource(requireContext(), ContentUris.withAppendedId(uri, music.id))
         var insertImg = musicImg.embeddedPicture
-        if(insertImg!=null){
-            var bitmap = BitmapFactory.decodeByteArray(insertImg,0,insertImg.size)
+        if (insertImg != null) {
+            var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
             binding.coverImageView.setImageBitmap(bitmap)
         }
 
     }
 
     private fun initRecyclerView() {
-        songlistadapter =  SongListAdapter(musicviewmodel.selectedPlayList.songlist)
+        songlistadapter = SongListAdapter(musicviewmodel.selectedPlayList.songlist)
 
         binding.playListRecyclerView.adapter = songlistadapter
         binding.playListRecyclerView.layoutManager = LinearLayoutManager(requireActivity())
@@ -418,9 +489,9 @@ class fragment_song : Fragment() {
         var mediaItem =
             MediaItem.fromUri("${MediaStore.Audio.Media.EXTERNAL_CONTENT_URI}/${musicviewmodel.selectedPlayList.songlist[position].id}")
 
-        binding.playerViewGroup.visibility=View.VISIBLE
+        binding.playerViewGroup.visibility = View.VISIBLE
 
-        player?.setMediaItem(mediaItem,0) // startPositionsMs=0 초 부터 시작
+        player?.setMediaItem(mediaItem, 0) // startPositionsMs=0 초 부터 시작
         player?.play()
     }
 

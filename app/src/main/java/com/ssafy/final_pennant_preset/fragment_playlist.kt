@@ -171,6 +171,7 @@ class fragment_playlist : Fragment() {
                                         ApplicationClass.sSharedPreferences.deleteSongListName(playlists[layoutPosition].playlistname)
                                         if(musicviewmodel.selectedPlaylistName.equals(musicviewmodel.playList.get(i).playlistname)){
                                             ApplicationClass.sSharedPreferences.putCurSongList("")
+                                            ApplicationClass.sSharedPreferences.putSelectedSongPosition(-1)
                                         }
                                         musicviewmodel.playList.removeAt(i)
                                         binding.rvTotalPlayList.adapter!!.notifyItemRemoved(i)

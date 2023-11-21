@@ -132,11 +132,12 @@ class SharedPreferencesUtil(context: Context) {
                 if (song.equals("")) {
                     break
                 }
+                Log.d(TAG, "deleteSongFromList: ${song}")
                 var element = song.split("||") // 하나의 MusicDTO 안의 요소들을 가져옴
-                Log.d(TAG, "deleteSongFromList: ${element[0]} / ${element[1]} / ${element[2]} / ${element[3]} / ${element[4]}")
 
                 if(!songInfo.equals(MusicDTO(element[0].toLong(),element[1],element[2].toLong(),element[3],element[4]))){
-                    newSongListStr+=song
+                    Log.d(TAG, "deleteSongFromList: add : ${song}")
+                    newSongListStr+=song+"&&"
                 }
             }
         }
