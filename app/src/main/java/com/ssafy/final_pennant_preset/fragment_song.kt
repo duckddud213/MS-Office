@@ -160,6 +160,7 @@ class fragment_song : Fragment() {
             player.play()
 
 
+
         }
 
         initPlayView()
