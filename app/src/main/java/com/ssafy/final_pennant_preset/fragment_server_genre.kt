@@ -66,6 +66,7 @@ class fragment_server_genre : Fragment() {
             Log.d(TAG, "registerObserver: $serverMusic")
             binding.rvServerGenre.apply {
 
+                musicListAdapter.genreList = it
                 adapter = musicListAdapter
                 musicListAdapter.notifyDataSetChanged()
             }
@@ -73,7 +74,7 @@ class fragment_server_genre : Fragment() {
     }
 
 
-    class MusicListAdapter(val genreList: MutableList<ServerMusicDTO>) :
+    class MusicListAdapter(var genreList: MutableList<ServerMusicDTO>) :
 
         RecyclerView.Adapter<MusicListAdapter.CustomViewHolder>() {
         inner class CustomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
