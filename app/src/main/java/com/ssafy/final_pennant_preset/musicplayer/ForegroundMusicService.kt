@@ -1,23 +1,36 @@
-//package com.ssafy.final_pennant_preset
+//package com.ssafy.final_pennant_preset.musicplayer
 //
 //import android.app.Service
 //import android.content.Intent
 //import android.media.MediaPlayer
+//import android.net.Uri
 //import android.os.IBinder
+//import android.provider.MediaStore
 //import android.util.Log
-//import com.google.android.exoplayer2.ExoPlayer
+//import com.google.android.exoplayer2.MediaItem
+//import com.ssafy.component_3.MusicNotification
+//import com.ssafy.final_pennant.R
+//import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 //
-//private const val TAG = "ForeMusicService_싸피"
+//private const val TAG = "ForegroundMusicService_싸피"
+//
 //class ForegroundMusicService : Service() {
-//    lateinit var ep : ExoPlayer
+//    lateinit var mp : MediaPlayer
+//    var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 //
 //    override fun onCreate() {
 //        super.onCreate()
-//        mp = MediaPlayer.create(this,R.raw.jazzbyrima)
+////
+////        mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
+////        player.setMediaItem(mediaItem, 0)
+////        binding.playControlImageView.setImageResource(R.drawable.img_pause)
+////        player.prepare()
+////        player.play()
+//        mp = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
 //        Log.d(TAG, "onCreate()")
 //    }
 //    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        Log.d( TAG, "Action Received = ${intent?.action}" )
+//        Log.d(TAG, "Action Received = ${intent?.action}")
 //        when (intent?.action) {
 //            Actions.START_FOREGROUND -> {
 //                Log.d(TAG, "Start Foreground 인텐트를 받음")
