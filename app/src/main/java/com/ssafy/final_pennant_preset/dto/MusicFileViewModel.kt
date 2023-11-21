@@ -1,16 +1,10 @@
 package com.ssafy.final_pennant_preset.dto
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class MusicFileViewModel:ViewModel() {
-//    private var _MusicList = MutableLiveData<MutableList<MusicDTO>>()
-//    val MusicList : LiveData<MutableList<MusicDTO>>
-//        get() = _MusicList
-//
-//    fun setMusicList(musicFile : MutableList<MusicDTO>){
-//        _MusicList.value = musicFile
-//    }
-
     var MusicList = mutableListOf<MusicDTO>()
         private set
 
@@ -27,4 +21,5 @@ class MusicFileViewModel:ViewModel() {
     var selectedPlayList : PlayListDTO = PlayListDTO("", mutableListOf<MusicDTO>())
 
     var selectedPlaylistName : String = ""
+
 }
