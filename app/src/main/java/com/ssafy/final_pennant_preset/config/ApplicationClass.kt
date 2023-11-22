@@ -2,6 +2,7 @@ package com.ssafy.final_pennant_preset.config
 
 import android.app.Application
 import android.util.Log
+import com.google.gson.GsonBuilder
 import com.ssafy.final_pennant_preset.service.FirebaseTokenService
 import com.ssafy.final_pennant_preset.util.SharedPreferencesUtil
 import okhttp3.OkHttpClient
@@ -69,10 +70,11 @@ class ApplicationClass : Application() {
             .addInterceptor(ReceivedCookiesInterceptor()) //쿠키 추출
             .build()
 
+        var gson = GsonBuilder().setLenient().create()
         sRetrofit = Retrofit.Builder()
             .baseUrl(API_URL)
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 

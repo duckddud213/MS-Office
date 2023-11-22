@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:icon="@drawable/img_playlist_add"
         android:id="@+id/context_menu_add_song_to_playlist"
         android:title="재생목록에 추가" />
+    <item
+        android:icon="@drawable/img_upload_to_server"
+        android:id="@+id/context_menu_send_song_to_server"
+        android:title="서버 업로드" />
 </menu>

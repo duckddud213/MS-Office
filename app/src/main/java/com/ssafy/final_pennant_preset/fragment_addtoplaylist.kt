@@ -77,7 +77,7 @@ class fragment_addtoplaylist : Fragment() {
 
         //재생목록이 없는 상태면 Toast메시지나 Dialog로 안내하고 강제로 페이지 전환 추가
 
-        var songInfo = musicfileviewmodel.selectedMusic
+        var songInfo = musicfileviewmodel.selectedMusicToBeAdded
 
         binding.btnAddSongToSelectedPlaylist.setOnClickListener {
             Log.d(TAG, "onViewCreated: ${musicfileviewmodel.checkedPlayList.size}")
@@ -115,6 +115,9 @@ class fragment_addtoplaylist : Fragment() {
                 }
             }
 
+            player.stop()
+            player.release()
+
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.framecontainer, fragment_totallist()).commit()
 
@@ -123,6 +126,9 @@ class fragment_addtoplaylist : Fragment() {
         }
 
         binding.btnGoBacks.setOnClickListener {
+            player.stop()
+            player.release()
+
             requireActivity().supportFragmentManager.beginTransaction()
                 .replace(R.id.framecontainer, fragment_totallist()).commit()
         }
@@ -176,6 +182,12 @@ class fragment_addtoplaylist : Fragment() {
     override fun onDetach() {
         super.onDetach()
         //프래그먼트간 화면 이동 시 음악 재생 진행률 정보 전달
+        player.stop()
+        player.release()
+    }
+
+    override fun onPause() {
+        super.onPause()
         player.stop()
         player.release()
     }

@@ -34,6 +34,6 @@ interface MusicService {
     @POST("/music/upload/{userId}/{genre}")
     suspend fun uploadMusic(@Path("userId") userId: String
                     , @Path("genre") genre: String
-                    , @Part("file") file: MultipartBody.Part) : Call<String>
+                    , @Part file: MultipartBody.Part) : String
 
 }

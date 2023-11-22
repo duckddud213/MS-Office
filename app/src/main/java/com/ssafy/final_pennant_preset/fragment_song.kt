@@ -216,6 +216,8 @@ class fragment_song : Fragment() {
             musicviewmodel.isPlaying = true
         }
 
+        Log.d(TAG, "onViewCreated: ${ApplicationClass.sSharedPreferences.getUID()}")
+        
         initPlayView()
         initPlayListButton()
         initPlayControlButtons()
@@ -448,7 +450,7 @@ class fragment_song : Fragment() {
         binding.playerSeekBar.max = (duration / 1000).toInt()
         binding.playerSeekBar.progress = (position / 1000).toInt()
 
-        musicviewmodel.isPlayingOn = player.currentPosition
+        musicviewmodel.isPlayingOn = player.currentPosition+500
         Log.d(TAG, "updateSeekUi: 시간 업데이트? : ${musicviewmodel.isPlayingOn}")
         binding.playTimeTextView.text = String.format(
             "%02d:%02d",
@@ -561,18 +563,18 @@ class fragment_song : Fragment() {
         player?.play()
     }
 
-    override fun onStop() {
-        super.onStop()
+//    override fun onStop() {
+//        super.onStop()
+//
+//        player?.pause()
+//        view?.removeCallbacks(updateSeekRunnable)
+//    }
 
-        player?.pause()
-        view?.removeCallbacks(updateSeekRunnable)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        _binding = null
-        player?.release()
-        view?.removeCallbacks(updateSeekRunnable)
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//
+//        _binding = null
+//        player?.release()
+//        view?.removeCallbacks(updateSeekRunnable)
+//    }
 }

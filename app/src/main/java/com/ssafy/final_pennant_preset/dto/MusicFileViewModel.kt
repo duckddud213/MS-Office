@@ -14,6 +14,8 @@ class MusicFileViewModel:ViewModel() {
     var checkedPlayList = mutableListOf<checkboxData>()
         private set
 
+    var selectedMusicToBeAdded : MusicDTO = MusicDTO(-1,"",-1,"","")
+
     var selectedMusic : MusicDTO = MusicDTO(-1,"",-1,"","")
 
     var selectedMusicPosition : Int = -1

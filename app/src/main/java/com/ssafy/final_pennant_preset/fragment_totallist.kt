@@ -18,6 +18,7 @@ import android.view.View
 import android.view.View.OnCreateContextMenuListener
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,12 +28,20 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.common.net.MediaType
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.FragmentTotallistBinding
 import com.ssafy.final_pennant_preset.config.ApplicationClass
 import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 import com.ssafy.final_pennant_preset.dto.PlayListDTO
+import com.ssafy.final_pennant_preset.util.RetrofitUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "fragment_totallist_싸피"
@@ -173,7 +182,6 @@ class fragment_totallist : Fragment() {
     }
     //=======================================
 
-
     private fun getPlayList() {
         musicviewmodel.playList.clear()
         var namelistarray = ApplicationClass.sSharedPreferences.getSongListName()
@@ -233,11 +241,28 @@ class fragment_totallist : Fragment() {
                     menuInflater.inflate(R.menu.contextmenu, menu)
                     menu?.findItem(R.id.context_menu_add_song_to_playlist)
                         ?.setOnMenuItemClickListener {
-                            musicviewmodel.selectedMusic = musicList[layoutPosition]
+                            musicviewmodel.selectedMusicToBeAdded = musicList[layoutPosition]
+
+                            player.stop()
+                            player.release()
+
                             supportFragmentManager.beginTransaction()
                                 .replace(R.id.framecontainer, fragment_addtoplaylist())
                                 .addToBackStack("addSongToPlayList").commit()
-                            Log.d(TAG, "onCreateContextMenu: ${musicviewmodel.selectedMusic}")
+                            Log.d(TAG, "onCreateContextMenu: ${musicviewmodel.selectedMusicToBeAdded}")
+                            true
+                        }
+
+                    menu?.findItem(R.id.context_menu_send_song_to_server)
+                        ?.setOnMenuItemClickListener {
+                            musicviewmodel.selectedMusicToBeAdded = musicList[layoutPosition]
+                            val u: Uri = ContentUris.withAppendedId(uri, musicviewmodel.selectedMusicToBeAdded.id)
+                            var fileBody = u.toString().toRequestBody("mp3/*".toMediaTypeOrNull())
+                            var mp3data = MultipartBody.Part.createFormData("file","${musicviewmodel.selectedMusicToBeAdded.title}.mp3",fileBody);
+
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    RetrofitUtil.musicService.uploadMusic(ApplicationClass.sSharedPreferences.getUID()!!,"idol",mp3data)
+                                }
                             true
                         }
                 }
