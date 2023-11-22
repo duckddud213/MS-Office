@@ -21,6 +21,7 @@ import android.view.View
 import android.view.View.OnCreateContextMenuListener
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
@@ -225,6 +226,7 @@ class fragment_totallist : Fragment() {
 
         inner class MusicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
             OnCreateContextMenuListener {
+            var songImg = itemView.findViewById<ImageView>(R.id.ivSongImg)
             var title = itemView.findViewById<TextView>(R.id.tvTitle)
             var artist = itemView.findViewById<TextView>(R.id.tvArtist)
             var genre = itemView.findViewById<TextView>(R.id.tvGenre)
@@ -238,7 +240,16 @@ class fragment_totallist : Fragment() {
                 title.text = music.title
                 artist.text = music.artist
                 genre.text = music.genre
-                Log.d(TAG, "bind: 제목은 ${music.title} / 장르는 ${music.genre}")
+
+                var musicImg = MediaMetadataRetriever()
+                musicImg.setDataSource(requireContext(), ContentUris.withAppendedId(uri, music.id))
+                var insertImg = musicImg.embeddedPicture
+
+                if (insertImg != null) {
+                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+                    songImg.setImageBitmap(bitmap)
+                }
+
             }
 
             override fun onCreateContextMenu(
@@ -324,15 +335,12 @@ class fragment_totallist : Fragment() {
             return MusicViewHolder(view).apply {
 
                 //추후 전체 곡 목록에서 클릭 시 재생목록 상관없이 단일 음원 재생 기능 추가 예정
-
+//
 //                itemView.setOnClickListener {
-//                    Toast.makeText(
-//                        parent.context,
-//                        "musicList.id:${layoutPosition}",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                    val u: Uri = ContentUris.withAppendedId(uri, musicList[layoutPosition].id)
-//                    val intent = Intent(Intent.ACTION_VIEW, u)
+//                    musicviewmodel.selectedMusic =
+//                    musicviewmodel.selectedMusicPosition
+//                    musicviewmodel.selectedPlayList
+//                    musicviewmodel.selectedPlaylistName
 //                }
 
             }

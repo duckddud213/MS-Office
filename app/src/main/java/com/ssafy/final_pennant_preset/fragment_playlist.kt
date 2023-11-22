@@ -1,8 +1,11 @@
 package com.ssafy.final_pennant_preset
 
+import android.app.Dialog
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -12,7 +15,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.EditText
+import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -26,6 +31,9 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.ssafy.final_pennant.R
+import com.ssafy.final_pennant.databinding.DialogAddplaylistBinding
+import com.ssafy.final_pennant.databinding.DialogDeleteplaylistBinding
+import com.ssafy.final_pennant.databinding.DialogUploadtoserverBinding
 import com.ssafy.final_pennant.databinding.FragmentPlaylistBinding
 import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
@@ -93,16 +101,18 @@ class fragment_playlist : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.fabAddNewPlayList.setOnClickListener {
-            val ad = AlertDialog.Builder(requireContext())
-            ad.setIcon(R.drawable.music_ssafy_office)
-            ad.setTitle("생성할 재생목록 이름 입력")
+            val dialogBinding: DialogAddplaylistBinding = DialogAddplaylistBinding.inflate(
+                LayoutInflater.from(requireContext())
+            )
 
-            val et: EditText = EditText(requireContext())
-            ad.setView(et)
+            var dialog = Dialog(requireContext())
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.setContentView(dialogBinding.root)
+            dialog.show()
 
-            ad.setPositiveButton("확인") { dialog, _ ->
-                var str: String = et.text.toString()
-
+            dialogBinding.btnCreatePlayListYes.setOnClickListener {
+                var str: String = dialogBinding.etNewPlayListName.text.toString()
                 if (str.equals("")) {
                     Toast.makeText(requireContext(), "이름을 입력해주세요.", Toast.LENGTH_SHORT).show()
                 } else {
@@ -111,18 +121,18 @@ class fragment_playlist : Fragment() {
                         addPlayList(str)
                         musicviewmodel.playList.add(PlayListDTO(str, mutableListOf<MusicDTO>()))
                         binding.rvTotalPlayList.adapter!!.notifyItemInserted(musicviewmodel.playList.size - 1)
-                    } else {
+                        ApplicationClass.sSharedPreferences.putSongList(str,mutableListOf<MusicDTO>())
+                    }
+                    else {
                         Toast.makeText(requireContext(), "기존에 생성된 재생목록입니다.", Toast.LENGTH_SHORT)
                             .show()
                     }
                 }
                 dialog.dismiss()
             }
-            ad.setNegativeButton("취소") { dialog, _ ->
+            dialogBinding.btnCreatePlayListNo.setOnClickListener {
                 dialog.dismiss()
             }
-            ad.show()
-
         }
 
         player = ExoPlayer.Builder(requireContext()).build()
@@ -277,14 +287,21 @@ class fragment_playlist : Fragment() {
                     menuInflater.inflate(R.menu.playlistcontextmenu, menu)
                     menu?.findItem(R.id.context_menu_delete_playlist)
                         ?.setOnMenuItemClickListener {
+                            val dialogBinding: DialogDeleteplaylistBinding =
+                                DialogDeleteplaylistBinding.inflate(
+                                    LayoutInflater.from(requireContext())
+                                )
 
-                            val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-                            builder.setTitle("재생목록 삭제")
-                            builder.setMessage(
+                            var dialog = Dialog(requireContext())
+                            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                            dialog.setContentView(dialogBinding.root)
+                            dialog.show()
+
+                            dialogBinding.tvDeletePlayListMsg.text =
                                 "재생 목록 [${playlists[layoutPosition].playlistname}]을 삭제하시겠습니까?"
-                            )
-                            builder.setCancelable(true)
-                            builder.setPositiveButton("삭제") { _, _ ->
+
+                            dialogBinding.btnDeletePlayListYes.setOnClickListener {
                                 for (i in 0..musicviewmodel.playList.size - 1) {
                                     if (musicviewmodel.playList.get(i).playlistname.equals(playlists[layoutPosition].playlistname)) {
                                         ApplicationClass.sSharedPreferences.deleteSongListName(
@@ -304,11 +321,11 @@ class fragment_playlist : Fragment() {
                                         break
                                     }
                                 }
+                                dialog.dismiss()
                             }
-                            builder.setNegativeButton(
-                                "취소"
-                            ) { dialog, _ -> dialog.cancel() }
-                            builder.create().show()
+                            dialogBinding.btnDeletePlayListNo.setOnClickListener {
+                                dialog.dismiss()
+                            }
 
                             true
                         }
