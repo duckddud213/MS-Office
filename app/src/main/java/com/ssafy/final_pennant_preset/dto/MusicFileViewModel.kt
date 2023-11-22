@@ -22,4 +22,6 @@ class MusicFileViewModel:ViewModel() {
 
     var selectedPlaylistName : String = ""
 
+    var isPlaying : Boolean = false
+    var isPlayingOn : Long = -1
 }

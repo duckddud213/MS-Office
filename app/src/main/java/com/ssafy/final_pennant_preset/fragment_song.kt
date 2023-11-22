@@ -87,16 +87,34 @@ class fragment_song : Fragment() {
         }
 
         playerNotificationManager =
-            PlayerNotificationManager.Builder(requireContext(), notificationId, "MS Office")
+            PlayerNotificationManager.Builder(requireActivity(), notificationId, "MS Office")
+                .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
+                    override fun onNotificationPosted(
+                        notificationId: Int,
+                        notification: Notification,
+                        ongoing: Boolean
+                    ) {
+                        super.onNotificationPosted(notificationId, notification, ongoing)
+                        if (ongoing) {
+                            Log.d(TAG, "onNotificationPosted: 재생 중이다")
+                            Log.d(TAG, "onNotificationPosted: ${notification.actions}")
+                        } else {
+                            Log.d(TAG, "onNotificationPosted: 멈췄다")
+                        }
+                    }
+                })
                 .setChannelImportance(IMPORTANCE_HIGH)
                 .setSmallIconResourceId(R.drawable.music_ssafy_office)
                 .setChannelDescriptionResourceId(R.string.app_name)
-                .setNextActionIconResourceId(R.drawable.img_skipnext)
                 .setPreviousActionIconResourceId(R.drawable.img_skipprevious)
                 .setPauseActionIconResourceId(R.drawable.img_pause)
                 .setPlayActionIconResourceId(R.drawable.img_play)
+                .setNextActionIconResourceId(R.drawable.img_skipnext)
                 .setChannelNameResourceId(R.string.app_name)
                 .build()
+
+
+        playerNotificationManager.setUseNextAction(true)
     }
 
     override fun onCreateView(
@@ -154,16 +172,10 @@ class fragment_song : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         player = ExoPlayer.Builder(requireContext()).build()
-        binding.playerView.showTimeoutMs = 0
+//        binding.playerView.showTimeoutMs = 0
         binding.playerView.player = player
 
-        playerNotificationManager.setUseNextAction(true)
-        playerNotificationManager.setUsePlayPauseActions(true)
-        playerNotificationManager.setUsePreviousAction(true)
-        playerNotificationManager.setPriority(NotificationCompat.PRIORITY_MAX)
-        playerNotificationManager.setUseRewindAction(false)
-        playerNotificationManager.setUseFastForwardAction(false)
-        playerNotificationManager.setPlayer(binding.playerView.player)
+        playerNotificationManager.setPlayer(player)
 
 
         binding.playListRecyclerView.apply {
@@ -193,10 +205,15 @@ class fragment_song : Fragment() {
             }
 
             mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
-            player.setMediaItem(mediaItem, 0)
+            if (musicviewmodel.isPlayingOn != (-1).toLong()) {
+                player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
+            } else {
+                player.setMediaItem(mediaItem, 0)
+            }
             binding.playControlImageView.setImageResource(R.drawable.img_pause)
             player.prepare()
             player.play()
+            musicviewmodel.isPlaying = true
         }
 
         initPlayView()
@@ -204,6 +221,12 @@ class fragment_song : Fragment() {
         initPlayControlButtons()
         initSeekBar()
         initRecyclerView()
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        player.stop()
+        player.release()
     }
 
     inner class SongListAdapter(val songList: MutableList<MusicDTO>) :
@@ -311,6 +334,7 @@ class fragment_song : Fragment() {
             if (player.isPlaying) {
                 Log.d(TAG, "initPlayControlButtons: player.isPlaying")
                 player.pause()
+                musicviewmodel.isPlaying = false
                 binding.playControlImageView.setImageResource(R.drawable.img_play)
             } else {
                 Log.d(TAG, "initPlayControlButtons: player.isNotPlaying")
@@ -404,6 +428,7 @@ class fragment_song : Fragment() {
         val duration = if (player.duration >= 0) player.duration else 0 // 전체 음악 길이
         val position = player.currentPosition
 
+        Log.d(TAG, "updateSeek: ")
         updateSeekUi(duration, position)
 
         val state = player.playbackState
@@ -423,6 +448,8 @@ class fragment_song : Fragment() {
         binding.playerSeekBar.max = (duration / 1000).toInt()
         binding.playerSeekBar.progress = (position / 1000).toInt()
 
+        musicviewmodel.isPlayingOn = player.currentPosition
+        Log.d(TAG, "updateSeekUi: 시간 업데이트? : ${musicviewmodel.isPlayingOn}")
         binding.playTimeTextView.text = String.format(
             "%02d:%02d",
             TimeUnit.MINUTES.convert(position, TimeUnit.MILLISECONDS), // 현재 분
@@ -448,6 +475,8 @@ class fragment_song : Fragment() {
                 musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition]
             binding.trackTextView.text = musicviewmodel.selectedMusic.title
             binding.artistTextView.text = musicviewmodel.selectedMusic.artist
+
+            ApplicationClass.sSharedPreferences.putSelectedSongPosition(musicviewmodel.selectedMusicPosition)
 
             var musicImg = MediaMetadataRetriever()
             Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
