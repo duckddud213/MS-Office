@@ -27,6 +27,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -337,11 +338,21 @@ class fragment_totallist : Fragment() {
                 //추후 전체 곡 목록에서 클릭 시 재생목록 상관없이 단일 음원 재생 기능 추가 예정
 
                 itemView.setOnClickListener {
-//                    musicviewmodel.selectedMusic =
-//                    musicviewmodel.selectedMusicPosition
-//                    musicviewmodel.selectedPlayList
-//                    musicviewmodel.selectedPlaylistName
-                    Log.d(TAG, "onCreateViewHolder: 위치는 ${layoutPosition}")
+                    //재생목록 없는 단일 곡 재생으로 환경 변경 => currentlist의 화면 구성도 바꾸고, fragment_song 내부의 list도 null list 설정
+                    musicviewmodel.selectedPlaylistName=""
+                    musicviewmodel.selectedPlayList=PlayListDTO("", mutableListOf<MusicDTO>())
+                    musicviewmodel.selectedMusic = musicList[layoutPosition]
+                    musicviewmodel.selectedMusicPosition = -1
+                    ApplicationClass.sSharedPreferences.putCurSongList("")
+                    ApplicationClass.sSharedPreferences.putSelectedSongPosition(musicviewmodel.selectedMusicPosition)
+                    requireActivity().apply {
+                        supportFragmentManager.popBackStack(
+                            null,
+                            FragmentManager.POP_BACK_STACK_INCLUSIVE
+                        )
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.framecontainer, fragment_song()).commit()
+                    }
                 }
 
             }

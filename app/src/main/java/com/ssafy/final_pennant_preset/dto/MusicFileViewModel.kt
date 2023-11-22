@@ -26,4 +26,5 @@ class MusicFileViewModel:ViewModel() {
 
     var isPlaying : Boolean = false
     var isPlayingOn : Long = -1
+//    var checkSameSong:Boolean = false
 }

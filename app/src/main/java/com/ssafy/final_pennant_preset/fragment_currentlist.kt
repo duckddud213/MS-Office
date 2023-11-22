@@ -279,6 +279,7 @@ class fragment_currentlist : Fragment() {
                 //클릭 시 해당 곡 재생 기능 추가
                 itemView.setOnClickListener {
                     Log.d(TAG, "onCreateViewHolder: position : ${layoutPosition}")
+
                     musicviewmodel.selectedMusic = songlist[layoutPosition]
                     musicviewmodel.selectedMusicPosition = layoutPosition
                     ApplicationClass.sSharedPreferences.putSelectedSongPosition(layoutPosition)

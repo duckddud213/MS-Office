@@ -353,6 +353,9 @@ class fragment_playlist : Fragment() {
                                 TAG,
                                 "onCreateViewHolder: getCur : ${ApplicationClass.sSharedPreferences.getCurSongList()}"
                             )
+                            
+                            player.stop()
+                            player.release()
 
                             requireActivity().apply {
                                 findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(
