@@ -16,15 +16,14 @@ interface MusicService {
     @GET("/music/genre/{genre}")
     suspend fun getMusicListByGenre(@Path("genre") genre: String): ArrayList<ServerMusicDTO>
 
-    @GET("/music/id/{id}")
+    @GET("/music/{id}")
     suspend fun getMusicById(@Path("id") id: String): ServerMusicDTO
 
     @GET("/music/userId/{userId}")
     suspend fun getMusicListByUserId(@Path("userId") userId: String): ArrayList<ServerMusicDTO>
 
-    @DELETE("/music/id/{userId}/{fileName}")
-    suspend fun deleteMusic(@Path("userId") userId: String, @Path("fileName") filename: String)
-
+    @DELETE("/music/{id}")
+    suspend fun deleteMusic(@Path("id") musicId: String)
 
     /**
      * 서버에 원하는 파일을 형식에 맞게 보내기 위한 작업 필요

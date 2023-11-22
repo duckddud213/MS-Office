@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +18,7 @@ import com.ssafy.final_pennant.databinding.FragmentServerGenreBinding
 import com.ssafy.final_pennant_preset.dto.ServerMusicDTO
 import com.ssafy.final_pennant_preset.config.ApplicationClass
 import com.ssafy.final_pennant_preset.service.MusicDownloader
+import com.ssafy.final_pennant_preset.util.RetrofitUtil
 
 private const val GENRE = ApplicationClass.CHANNEL_POP
 
@@ -58,9 +60,8 @@ class fragment_server_genre : Fragment() {
 
         downLoader = MusicDownloader(mainActivity)
 
-        musicListAdapter.myItemClickListener = object : MusicListAdapter.ItemClickListener{
+        musicListAdapter.myItemClickListener = object : ItemClickListener{
             override fun onMyClick(view: View, dto: ServerMusicDTO) {
-//                mainActivity.downloadUrl(Uri.parse(dto.musicUrl), dto.musicName)
                 downLoader.downloadFile(dto.musicUrl, dto.musicName)
             }
         }
@@ -89,19 +90,23 @@ class fragment_server_genre : Fragment() {
     }
 
 
-    class MusicListAdapter(var genreList: MutableList<ServerMusicDTO>) :
+    inner class MusicListAdapter(var genreList: MutableList<ServerMusicDTO>) :
 
         RecyclerView.Adapter<MusicListAdapter.CustomViewHolder>() {
         inner class CustomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
             View.OnCreateContextMenuListener {
 
             var tv_genre = itemView.findViewById<TextView>(R.id.tvPlayListTitle)
+            lateinit var serverMusic: ServerMusicDTO
+            val uid = ApplicationClass.sSharedPreferences.getUID()!!
 
             fun bind(music: ServerMusicDTO) {
+                serverMusic = music
                 tv_genre.text = music.toString()
                 tv_genre.setOnClickListener {
                     myItemClickListener.onMyClick(it, music)
                 }
+                tv_genre.setOnCreateContextMenuListener(this)
             }
 
             override fun onCreateContextMenu(
@@ -109,11 +114,18 @@ class fragment_server_genre : Fragment() {
                 v: View?,
                 menuInfo: ContextMenu.ContextMenuInfo?
             ) {
+                requireActivity().apply {
+                    if (uid == serverMusic.uploadUser) {
+                        menuInflater.inflate(R.menu.server_item_remove, menu)
+                        menu?.findItem(R.id.server_rmItem)
+                            ?.setOnMenuItemClickListener {
+                            serverViewModel.deleteMusic(genre!!, serverMusic.musicId)
+                            musicListAdapter.genreList.remove(serverMusic)
+                            true
+                        }
+                    }
+                }
             }
-        }
-
-        interface ItemClickListener{
-            fun onMyClick(view: View, dto: ServerMusicDTO)
         }
 
         lateinit var myItemClickListener: ItemClickListener
@@ -131,6 +143,10 @@ class fragment_server_genre : Fragment() {
         }
     }
 
+
+    interface ItemClickListener{
+        fun onMyClick(view: View, dto: ServerMusicDTO)
+    }
 
     companion object {
         @JvmStatic

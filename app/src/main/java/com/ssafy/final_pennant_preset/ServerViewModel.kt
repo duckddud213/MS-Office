@@ -32,12 +32,13 @@ class ServerViewModel : ViewModel() {
         }
     }
 
-    fun deleteMusic(filename: String) {
-        val uid = ApplicationClass.sSharedPreferences.getUID()!!
+    fun deleteMusic(genre: String, musicId: String) {
+//        val uid = ApplicationClass.sSharedPreferences.getUID()!!
 
         viewModelScope.launch {
             try {
-                RetrofitUtil.musicService.deleteMusic(filename, uid)
+                RetrofitUtil.musicService.deleteMusic(musicId)
+                getListWithGenre(genre)
             } catch (e: Exception) {
                 Log.d(TAG, "deleteMusic: 파일 삭제 실패")
             }

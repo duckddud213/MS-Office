@@ -76,7 +76,6 @@ class fragment_server : Fragment() {
         val genreListAdapter = GenreListAdapter(genreList)
         genreListAdapter.myItemClickListener = object : GenreListAdapter.ItemClickListener{
             override fun onMyClick(view: View, data: String, position: Int) {
-                Toast.makeText(requireContext(), data, Toast.LENGTH_SHORT).show()
                 val genreFrag = fragment_server_genre
                 parentFragmentManager.beginTransaction()
                     .addToBackStack(null)
@@ -91,19 +90,6 @@ class fragment_server : Fragment() {
             addItemDecoration(CustomItemDecoration())
         }
     }
-
-//    // 네트워크로 데이터 전송, Retrofit 객체 생성
-//    Retrofit retrofit = NetworkClient.getRetrofitClient(AddSnsActivity.this);
-//    SnsApi api = retrofit.create(SnsApi.class);
-//
-//// 멀티파트로 파일을 보내는 경우 파라미터 생성 방법, (파일명, 파일 타입)
-//    RequestBody fileBody = RequestBody.create(photoFile, MediaType.parse("image/*"));
-//
-//    MultipartBody.Part photo = MultipartBody.Part.createFormData("photo", photoFile.getName(), fileBody);
-//
-//// 멀티파트를 텍스트로 보내는 경우 파라미터 보내는 방법 ( 내용, 텍스트 타입)
-//    RequestBody contentBody = RequestBody.create(content, MediaType.parse("text/plain"));
-
 
     class GenreListAdapter(val genreList: MutableList<String>) :
 
