@@ -47,12 +47,6 @@ class DownloadCompletedReceiver : BroadcastReceiver() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-//
-//            if (id != -1L) {
-//                Toast.makeText(context, "$id finished!", Toast.LENGTH_SHORT).show()
-//            } else {
-//
-//            }
         }
     }
 }

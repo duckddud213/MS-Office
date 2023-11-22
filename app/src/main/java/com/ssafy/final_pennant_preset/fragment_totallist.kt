@@ -19,6 +19,7 @@ import android.view.View.OnCreateContextMenuListener
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,7 +42,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "fragment_totallist_싸피"
@@ -256,9 +259,10 @@ class fragment_totallist : Fragment() {
                     menu?.findItem(R.id.context_menu_send_song_to_server)
                         ?.setOnMenuItemClickListener {
                             musicviewmodel.selectedMusicToBeAdded = musicList[layoutPosition]
-                            val u: Uri = ContentUris.withAppendedId(uri, musicviewmodel.selectedMusicToBeAdded.id)
-                            var fileBody = u.toString().toRequestBody("mp3/*".toMediaTypeOrNull())
-                            var mp3data = MultipartBody.Part.createFormData("file","${musicviewmodel.selectedMusicToBeAdded.title}.mp3",fileBody);
+                            val uri = ContentUris.withAppendedId(uri, musicviewmodel.selectedMusicToBeAdded.id)
+                            val file = File(getFilePathUri(uri))
+                            val fileBody = file.asRequestBody("audio/*".toMediaTypeOrNull())
+                            val mp3data = MultipartBody.Part.createFormData("file","${musicviewmodel.selectedMusicToBeAdded.title}.mp3",fileBody);
 
                                 CoroutineScope(Dispatchers.Main).launch {
                                     RetrofitUtil.musicService.uploadMusic(ApplicationClass.sSharedPreferences.getUID()!!,"idol",mp3data)
@@ -268,6 +272,19 @@ class fragment_totallist : Fragment() {
                 }
             }
 
+        }
+
+        private fun getFilePathUri(uri: Uri) : String{
+
+            var columnIndex = 0
+            val proj = arrayOf(MediaStore.Images.Media.DATA)
+            var cursor = requireActivity().contentResolver.query(uri, proj, null, null, null)
+
+            if (cursor!!.moveToFirst()){
+                columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            }
+
+            return cursor.getString(columnIndex)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MusicViewHolder {
