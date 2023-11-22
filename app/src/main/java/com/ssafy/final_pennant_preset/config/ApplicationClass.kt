@@ -1,6 +1,7 @@
 package com.ssafy.final_pennant_preset.config
 
 import android.app.Application
+import android.os.Environment
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.ssafy.final_pennant_preset.service.FirebaseTokenService
@@ -27,6 +28,8 @@ class ApplicationClass : Application() {
         // 전역변수 문법을 통해 Retrofit 인스턴스를 앱 실행 시 1번만 생성하여 사용 (싱글톤 객체)
         lateinit var sRetrofit: Retrofit
         lateinit var sSharedPreferences: SharedPreferencesUtil
+
+        val DOWNLOAD_PATH = Environment.DIRECTORY_DOWNLOADS + "/msOffice/"
 
         const val SHARED_PREFERENCES_NAME = "Music_Ssafy_OFFICE"
 

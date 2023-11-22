@@ -1,8 +1,7 @@
 package com.ssafy.final_pennant_preset
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.ContextMenu
 import androidx.fragment.app.Fragment
@@ -11,14 +10,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ssafy.final_pennant.R
-import com.ssafy.final_pennant.databinding.FragmentServerBinding
 import com.ssafy.final_pennant.databinding.FragmentServerGenreBinding
 import com.ssafy.final_pennant_preset.dto.ServerMusicDTO
 import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.service.MusicDownloader
 
 private const val GENRE = ApplicationClass.CHANNEL_POP
 
@@ -30,12 +28,13 @@ class fragment_server_genre : Fragment() {
     private val binding: FragmentServerGenreBinding
         get() = _binding!!
 
+    private lateinit var mainActivity: MainActivity
+
     private val serverViewModel : ServerViewModel by viewModels()
     private lateinit var serverMusic : ArrayList<ServerMusicDTO>
 
     private lateinit var musicListAdapter : MusicListAdapter
-    private val downloadFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + "/msOffice")
-
+    private lateinit var downLoader : MusicDownloader
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -57,9 +56,12 @@ class fragment_server_genre : Fragment() {
         serverViewModel.getListWithGenre(genre!!)
         musicListAdapter = MusicListAdapter(arrayListOf())
 
+        downLoader = MusicDownloader(mainActivity)
+
         musicListAdapter.myItemClickListener = object : MusicListAdapter.ItemClickListener{
             override fun onMyClick(view: View, dto: ServerMusicDTO) {
-
+//                mainActivity.downloadUrl(Uri.parse(dto.musicUrl), dto.musicName)
+                downLoader.downloadFile(dto.musicUrl, dto.musicName)
             }
         }
 
@@ -67,6 +69,11 @@ class fragment_server_genre : Fragment() {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = musicListAdapter
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivity = context as MainActivity
     }
 
     fun registerObserver() {

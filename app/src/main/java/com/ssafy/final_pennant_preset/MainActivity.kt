@@ -34,6 +34,7 @@ import com.ssafy.final_pennant_preset.util.RetrofitUtil
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 
 
 private const val TAG = "MainActivity_싸피"
@@ -99,16 +100,6 @@ class MainActivity : AppCompatActivity() {
         initNotificationChannel()
     }
 
-    override fun onResume() {
-        super.onResume()
-        val completeFilter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-//        registerReceiver(downloadCompleteReceiver, completeFilter)
-    }
-
-    override fun onPause() {
-        super.onPause()
-//        unregisterReceiver(downloadCompleteReceiver)
-    }
 
     // firebase 로그인 관련
 
@@ -245,48 +236,6 @@ class MainActivity : AppCompatActivity() {
                 = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
-
-
-
-    // 파일 다운로드 관련
-
-//    lateinit var mDownloadQueueId: Long
-
-//    private val downloadCompleteReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-//        override fun onReceive(context: Context, intent: Intent) {
-//            val reference = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-//            if (mDownloadQueueId === reference) {
-//                val query = DownloadManager.Query() // 다운로드 항목 조회에 필요한 정보 포함
-//                query.setFilterById(reference)
-//                val cursor: Cursor = mDownloadManager.query(query)
-//                cursor.moveToFirst()
-//                val columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-//                val columnReason = cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
-//                val status = cursor.getInt(columnIndex)
-//                val reason = cursor.getInt(columnReason)
-//                cursor.close()
-//                when (status) {
-//                    DownloadManager.STATUS_SUCCESSFUL -> Toast.makeText(
-//                        this@MainActivity,
-//                        "다운로드를 완료하였습니다.",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//
-//                    DownloadManager.STATUS_PAUSED -> Toast.makeText(
-//                        this@MainActivity,
-//                        "다운로드가 중단되었습니다.",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//
-//                    DownloadManager.STATUS_FAILED -> Toast.makeText(
-//                        this@MainActivity,
-//                        "다운로드가 취소되었습니다.",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
-//            }
-//        }
-//    }
 
     companion object {
         private const val RC_SIGN_IN = 9001
