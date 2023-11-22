@@ -181,7 +181,7 @@ class fragment_song : Fragment() {
         binding.playListRecyclerView.apply {
             adapter = adapter
             this.layoutManager = LinearLayoutManager(requireActivity())
-            addItemDecoration(CustomItemDecoration())
+            addItemDecoration(CustomItemDecoration(requireContext()))
         }
 
         if (musicviewmodel.selectedMusicPosition != -1 && musicviewmodel.selectedPlaylistName != "" && musicviewmodel.selectedMusic.id.toInt() != -1) {

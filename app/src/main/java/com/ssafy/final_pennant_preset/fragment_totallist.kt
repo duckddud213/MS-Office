@@ -215,7 +215,7 @@ class fragment_totallist : Fragment() {
         binding.rvTotalSong.apply {
             adapter = musicAdapter
             this.layoutManager = LinearLayoutManager(requireActivity())
-            addItemDecoration(CustomItemDecoration())
+            addItemDecoration(CustomItemDecoration(requireContext()))
         }
     }
 
@@ -335,13 +335,14 @@ class fragment_totallist : Fragment() {
             return MusicViewHolder(view).apply {
 
                 //추후 전체 곡 목록에서 클릭 시 재생목록 상관없이 단일 음원 재생 기능 추가 예정
-//
-//                itemView.setOnClickListener {
+
+                itemView.setOnClickListener {
 //                    musicviewmodel.selectedMusic =
 //                    musicviewmodel.selectedMusicPosition
 //                    musicviewmodel.selectedPlayList
 //                    musicviewmodel.selectedPlaylistName
-//                }
+                    Log.d(TAG, "onCreateViewHolder: 위치는 ${layoutPosition}")
+                }
 
             }
         }

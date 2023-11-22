@@ -92,7 +92,7 @@ class fragment_playlist : Fragment() {
         binding.rvTotalPlayList.apply {
             adapter = playListAdapter
             this.layoutManager = LinearLayoutManager(requireActivity())
-            addItemDecoration(CustomItemDecoration())
+            addItemDecoration(CustomItemDecoration(requireContext()))
         }
         return binding.root
     }

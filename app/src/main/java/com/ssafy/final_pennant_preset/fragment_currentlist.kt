@@ -92,7 +92,7 @@ class fragment_currentlist : Fragment() {
         binding.rvCurrentPlayList.apply {
             adapter = currentPlayListAdapter
             this.layoutManager = LinearLayoutManager(requireActivity())
-            addItemDecoration(CustomItemDecoration())
+            addItemDecoration(CustomItemDecoration(requireContext()))
         }
 
         return binding.root
@@ -278,6 +278,7 @@ class fragment_currentlist : Fragment() {
             return CurrentPlayListViewHolder(view).apply {
                 //클릭 시 해당 곡 재생 기능 추가
                 itemView.setOnClickListener {
+                    Log.d(TAG, "onCreateViewHolder: position : ${layoutPosition}")
                     musicviewmodel.selectedMusic = songlist[layoutPosition]
                     musicviewmodel.selectedMusicPosition = layoutPosition
                     ApplicationClass.sSharedPreferences.putSelectedSongPosition(layoutPosition)

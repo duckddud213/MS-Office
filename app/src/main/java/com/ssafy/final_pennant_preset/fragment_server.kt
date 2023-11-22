@@ -87,7 +87,7 @@ class fragment_server : Fragment() {
         binding.rvServerGenre.apply {
             adapter = genreListAdapter
             this.layoutManager = LinearLayoutManager(requireActivity())
-            addItemDecoration(CustomItemDecoration())
+            addItemDecoration(CustomItemDecoration(requireContext()))
         }
     }
 

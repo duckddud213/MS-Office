@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools">
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -26,7 +27,8 @@
             app:layout_constraintTop_toBottomOf="@id/framecontainer"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_weight="1"
-            app:layout_constraintVertical_bias="0.5"/>
+            app:layout_constraintVertical_bias="0.5"
+            android:orientation="horizontal" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -51,8 +53,25 @@
         android:id="@+id/btnPlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorPrimary"
+        android:backgroundTint="@color/colorAccent"
+        android:alpha="0.8"
         android:src="@drawable/img_play"
         app:layout_anchor="@id/bottomAppbar" />
+
+    <com.scwang.wave.MultiWaveHeader
+        android:id="@+id/waveHeader"
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:layout_gravity="bottom"
+        android:scaleY="-1"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        app:mwhVelocity="2"
+        app:mwhGradientAngle="45"
+        app:mwhCloseColor="#81FFEF"
+        app:mwhStartColor="#F067B4"
+        app:mwhWaveHeight="60dp"
+        app:mwhColorAlpha="0.1"
+        app:mwhWaves="MultiWave"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
