@@ -368,12 +368,19 @@ class fragment_totallist : Fragment() {
 
                     val dto = MusicDTO(id, title, albumId, artist, genre)
 
-                    //기본 설정 통화 녹음 파일들 제외
-                    if (!dto.title.contains("통화") && !dto.title.contains("녹음") && set.add(dto)
-                    ) {
-                        Log.d(TAG, "initData: ${dto.title} || ${dto.artist}")
+                    if (title.contains("통화")) continue
+                    if (title.contains("녹음")) continue
+                    Log.d(TAG, "${dto.toString()}: ${set.contains(dto)}")
+                    if (set.add(dto)) {
                         musicviewmodel.MusicList.add(dto)
                     }
+
+                    //기본 설정 통화 녹음 파일들 제외
+//                    if (!dto.title.contains("통화") && !dto.title.contains("녹음") && set.add(dto)
+//                    ) {
+//                        Log.d(TAG, "initData: ${dto.title} || ${dto.artist}")
+//                        musicviewmodel.MusicList.add(dto)
+//                    }
                 } while (it.moveToNext())
             }
         }

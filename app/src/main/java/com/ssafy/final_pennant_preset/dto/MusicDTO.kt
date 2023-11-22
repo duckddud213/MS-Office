@@ -5,9 +5,8 @@ data class MusicDTO(val id:Long, val title:String,val albumId:Long, val artist:S
         var oDto = other as MusicDTO
         return (oDto.title == title && oDto.artist == artist)
     }
-
     override fun hashCode(): Int {
-        return title.hashCode().xor(id.hashCode())
+        return title.hashCode().xor(artist.hashCode())
     }
 }
 
