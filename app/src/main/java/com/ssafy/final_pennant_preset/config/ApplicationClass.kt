@@ -19,9 +19,9 @@ private const val TAG = "ApplicationClass"
 class ApplicationClass : Application() {
 
     //url must be end with "/"
-//    val IP_ADDR = "43.202.250.12:9987"
+    val IP_ADDR = "43.202.250.12:9987"
 //    val IP_ADDR = "192.168.0.7:9987"
-    val IP_ADDR = "192.168.33.113:9987"
+//    val IP_ADDR = "192.168.33.113:9987"
     val API_URL = "http://$IP_ADDR/"
 
     companion object {
