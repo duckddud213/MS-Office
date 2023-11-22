@@ -233,6 +233,7 @@ class fragment_currentlist : Fragment() {
                             builder.setMessage(
                                 "현재 재생 목록에서 [${songlist[layoutPosition].title}]을 삭제하시겠습니까?"
                             )
+                            builder.setIcon(R.drawable.music_ssafy_office)
                             builder.setCancelable(true)
                             builder.setPositiveButton("삭제") { _, _ ->
                                 ApplicationClass.sSharedPreferences.deleteSongFromList(

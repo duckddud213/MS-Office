@@ -1,12 +1,15 @@
 package com.ssafy.final_pennant_preset
 
 
+import android.app.Dialog
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
@@ -17,6 +20,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnCreateContextMenuListener
 import android.view.ViewGroup
+import android.view.Window
+import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.net.toFile
@@ -31,6 +36,7 @@ import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.common.net.MediaType
 import com.ssafy.final_pennant.R
+import com.ssafy.final_pennant.databinding.DialogUploadtoserverBinding
 import com.ssafy.final_pennant.databinding.FragmentTotallistBinding
 import com.ssafy.final_pennant_preset.config.ApplicationClass
 import com.ssafy.final_pennant_preset.dto.MusicDTO
@@ -259,19 +265,44 @@ class fragment_totallist : Fragment() {
                     menu?.findItem(R.id.context_menu_send_song_to_server)
                         ?.setOnMenuItemClickListener {
                             musicviewmodel.selectedMusicToBeAdded = musicList[layoutPosition]
-                            val uri = ContentUris.withAppendedId(uri, musicviewmodel.selectedMusicToBeAdded.id)
-                            val file = File(getFilePathUri(uri))
-                            val fileBody = file.asRequestBody("audio/*".toMediaTypeOrNull())
-                            val mp3data = MultipartBody.Part.createFormData("file","${musicviewmodel.selectedMusicToBeAdded.title}.mp3",fileBody);
 
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    RetrofitUtil.musicService.uploadMusic(ApplicationClass.sSharedPreferences.getUID()!!,"idol",mp3data)
-                                }
+                            val dialogBinding : DialogUploadtoserverBinding = DialogUploadtoserverBinding.inflate(
+                                LayoutInflater.from(requireContext()))
+
+                            var dialog = Dialog(requireContext())
+                            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                            dialog.setContentView(dialogBinding.root)
+                            dialog.show()
+
+                            dialogBinding.standardApply.setOnClickListener{
+                                val selectedRadio1 = dialogBinding.standardRadioGroup1.checkedRadioButtonId
+
+                                val radioBtn1 = dialog.findViewById<View>(selectedRadio1) as RadioButton?
+
+                                dialog.dismiss()
+                                Log.d(TAG, "onCreateContextMenu: ${radioBtn1!!.text.toString()}")
+                                uploadToServer(radioBtn1!!.text.toString())
+                            }
+                            dialogBinding.standardCancel.setOnClickListener {
+                                dialog.dismiss()
+                            }
+                            
                             true
                         }
                 }
             }
+        }
 
+        private fun uploadToServer(genreName : String){
+            val uri = ContentUris.withAppendedId(uri, musicviewmodel.selectedMusicToBeAdded.id)
+            val file = File(getFilePathUri(uri))
+            val fileBody = file.asRequestBody("audio/*".toMediaTypeOrNull())
+            val mp3data = MultipartBody.Part.createFormData("file","${musicviewmodel.selectedMusicToBeAdded.title}.mp3",fileBody);
+
+            CoroutineScope(Dispatchers.Main).launch {
+                RetrofitUtil.musicService.uploadMusic(ApplicationClass.sSharedPreferences.getUID()!!,genreName.lowercase(),mp3data)
+            }
         }
 
         private fun getFilePathUri(uri: Uri) : String{
