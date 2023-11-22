@@ -1,6 +1,8 @@
 package com.ssafy.final_pennant_preset
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.ContextMenu
 import androidx.fragment.app.Fragment
@@ -32,13 +34,13 @@ class fragment_server_genre : Fragment() {
     private lateinit var serverMusic : ArrayList<ServerMusicDTO>
 
     private lateinit var musicListAdapter : MusicListAdapter
+    private val downloadFilePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS + "/msOffice")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             genre = it.getString(GENRE)
         }
-
     }
 
     override fun onCreateView(
@@ -54,6 +56,13 @@ class fragment_server_genre : Fragment() {
         registerObserver()
         serverViewModel.getListWithGenre(genre!!)
         musicListAdapter = MusicListAdapter(arrayListOf())
+
+        musicListAdapter.myItemClickListener = object : MusicListAdapter.ItemClickListener{
+            override fun onMyClick(view: View, dto: ServerMusicDTO) {
+
+            }
+        }
+
         binding.rvServerGenre.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = musicListAdapter
@@ -65,7 +74,6 @@ class fragment_server_genre : Fragment() {
             serverMusic = it as ArrayList<ServerMusicDTO>
             Log.d(TAG, "registerObserver: $serverMusic")
             binding.rvServerGenre.apply {
-
                 musicListAdapter.genreList = it
                 adapter = musicListAdapter
                 musicListAdapter.notifyDataSetChanged()
