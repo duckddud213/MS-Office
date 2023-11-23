@@ -60,6 +60,8 @@ class fragment_addtoplaylist : Fragment() {
         super.onAttach(context)
     }
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         musicfileviewmodel.checkedPlayList.clear()
@@ -121,7 +123,7 @@ class fragment_addtoplaylist : Fragment() {
                 }
             }
 
-            player.stop()
+            if (player.isPlaying) player.stop()
             player.release()
 
             requireActivity().supportFragmentManager.beginTransaction()
@@ -196,14 +198,14 @@ class fragment_addtoplaylist : Fragment() {
     override fun onDetach() {
         super.onDetach()
         //프래그먼트간 화면 이동 시 음악 재생 진행률 정보 전달
-        player.stop()
-        player.release()
+//        player.stop()
+//        player.release()
     }
 
     override fun onPause() {
         super.onPause()
-        player.stop()
-        player.release()
+//        player.stop()
+//        player.release()
     }
 
     //=======================================

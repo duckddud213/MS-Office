@@ -3,12 +3,8 @@ package com.ssafy.final_pennant_preset
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager.IMPORTANCE_HIGH
-import android.app.NotificationManager.IMPORTANCE_LOW
-import android.app.PendingIntent
 import android.content.ContentUris
 import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -23,9 +19,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.Nullable
-import androidx.core.app.NotificationCompat
-import androidx.core.app.ServiceCompat.stopForeground
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -36,10 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.offline.DownloadService.startForeground
-import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import com.google.android.exoplayer2.ui.PlayerNotificationManager.MediaDescriptionAdapter
 import com.google.android.exoplayer2.ui.PlayerNotificationManager.NotificationListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
@@ -226,6 +217,7 @@ class fragment_song : Fragment() {
             binding.artistTextView.text = musicviewmodel.selectedMusic.artist
 
             var musicImg = MediaMetadataRetriever()
+
             musicImg.setDataSource(
                 requireContext(),
                 ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
@@ -246,30 +238,51 @@ class fragment_song : Fragment() {
             }
             else player.setMediaItem(mediaItem,0)
 
-            musicviewmodel.checkSameSong=true
+            musicviewmodel.checkSameSong = true
 
             binding.playControlImageView.setImageResource(R.drawable.img_pause)
-            player.prepare()
-            player.play()
-            musicviewmodel.isPlaying = true
+
         }
         else{
+
             //한 곡 재생인 경우
-            if(musicviewmodel.downloadedUri!=""){
+            if(musicviewmodel.downloadedUri != ""){
                 Log.d(TAG, "onViewCreated: 여기로 와주세요 제발 ")
                 mediaItem = MediaItem.fromUri(getDownloadFileToUri()!!)
-                player.setMediaItem(mediaItem, 0)
-                binding.playControlImageView.setImageResource(R.drawable.img_pause)
+                var musicImg = MediaMetadataRetriever()
+                musicImg.setDataSource(requireContext(), getDownloadFileToUri())
+                var insertImg = musicImg.embeddedPicture
+                if (insertImg != null) {
+                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+                    binding.coverImageView.setImageBitmap(bitmap)
+                }
+                else{
+                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+                }
             }
             else if(!musicviewmodel.selectedMusic.equals(MusicDTO(-1, "", -1, "", ""))){
                 mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
-                player.setMediaItem(mediaItem, 0)
-                binding.playControlImageView.setImageResource(R.drawable.img_pause)
+                val filePath = getFilePathUri(("${uri}/${musicviewmodel.selectedMusic.id}").toUri())
+                val file = File(filePath)
+                var musicImg = MediaMetadataRetriever()
+                musicImg.setDataSource(requireContext(), file.toUri())
+
+                var insertImg = musicImg.embeddedPicture
+                if (insertImg != null) {
+                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+                    binding.coverImageView.setImageBitmap(bitmap)
+                }
+                else{
+                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+                }
             }
-            player.prepare()
-            player.play()
-            musicviewmodel.isPlaying = true
         }
+
+        player.setMediaItem(mediaItem, 0)
+        binding.playControlImageView.setImageResource(R.drawable.img_pause)
+        player.prepare()
+        player.play()
+        musicviewmodel.isPlaying = true
 
         Log.d(TAG, "onViewCreated: ${ApplicationClass.sSharedPreferences.getUID()}")
 
@@ -279,6 +292,20 @@ class fragment_song : Fragment() {
         initSeekBar()
         initRecyclerView()
     }
+
+    private fun getFilePathUri(uri: Uri) : String{
+
+        var columnIndex = 0
+        val proj = arrayOf(MediaStore.Images.Media.DATA)
+        var cursor = requireActivity().contentResolver.query(uri, proj, null, null, null)
+
+        if (cursor!!.moveToFirst()){
+            columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        }
+
+        return cursor.getString(columnIndex)
+    }
+
 
     override fun onDetach() {
         super.onDetach()
@@ -651,6 +678,10 @@ class fragment_song : Fragment() {
         Log.d(TAG, "getDownloadFileToUri: $file")
         if (file.isFile) return file.toUri()
         return null
+    }
+
+    fun getCurFile(): File {
+        return File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + mainActivityViewModel.downloadFile)
     }
 //    private fun setMusicList(modelList: List<MusicModel>) {
 //        player ?: return

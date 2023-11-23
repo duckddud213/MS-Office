@@ -96,6 +96,8 @@ class fragment_server_genre : Fragment() {
         mainActivity = context as MainActivity
     }
 
+
+
     fun registerObserver() {
         mainActivityViewModel.musicWithGenre.observe(viewLifecycleOwner) {
             Log.d(TAG, "registerObserver: $it")
