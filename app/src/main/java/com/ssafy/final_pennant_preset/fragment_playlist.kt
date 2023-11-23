@@ -218,7 +218,7 @@ class fragment_playlist : Fragment() {
 
         }
 
-        musicviewmodel.isPlayingOn = player.currentPosition
+        musicviewmodel.isPlayingOn = player.currentPosition + 1000
         Log.d(TAG, "savePlayingState: 진짜 바뀌나? : ${musicviewmodel.isPlayingOn}")
 
         if (player.playbackState != Player.STATE_IDLE && player.playbackState != Player.STATE_ENDED) {

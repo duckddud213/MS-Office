@@ -548,7 +548,7 @@ class fragment_song : Fragment() {
         binding.playerSeekBar.max = (duration / 1000).toInt()
         binding.playerSeekBar.progress = (position / 1000).toInt()
 
-        musicviewmodel.isPlayingOn = player.currentPosition + 500
+        musicviewmodel.isPlayingOn = player.currentPosition + 1000
         Log.d(TAG, "updateSeekUi: 시간 업데이트? : ${musicviewmodel.isPlayingOn}")
         binding.playTimeTextView.text = String.format(
             "%02d:%02d",
