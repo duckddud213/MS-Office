@@ -19,6 +19,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -108,6 +109,8 @@ class fragment_server_genre : Fragment() {
             View.OnCreateContextMenuListener {
 
             var tv_genre = itemView.findViewById<TextView>(R.id.tvPlayListTitle)
+            var tv_mine = itemView.findViewById<TextView>(R.id.tvPlayIsMine)
+            var layout_serverItem = itemView.findViewById<ConstraintLayout>(R.id.layoutServerItem)
             lateinit var serverMusic: ServerMusicDTO
             val uid = ApplicationClass.sSharedPreferences.getUID()!!
 
@@ -120,10 +123,11 @@ class fragment_server_genre : Fragment() {
                 tv_genre.setOnCreateContextMenuListener(this)
 
                 if (uid == music.uploadUser) {
-                    tv_genre.setBackgroundResource(R.drawable.gradient)
+                    layout_serverItem.setBackgroundResource(R.drawable.gradient)
                     // background color
-                    tv_genre.background.alpha = 100
+                    layout_serverItem.background.alpha = 100
                     // 투명도
+                    tv_mine.text = "my muisc"
                 }
             }
 

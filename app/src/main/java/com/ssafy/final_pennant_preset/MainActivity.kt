@@ -8,11 +8,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.Cursor
+import android.media.MediaMetadataRetriever
 import android.media.browse.MediaBrowser.MediaItem
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -303,18 +305,21 @@ class MainActivity : AppCompatActivity() {
                             context,
                             "다운로드를 완료하였습니다.",
                             Toast.LENGTH_SHORT
-                            // 여기에서 다운로드 완료 처리하는 코드 작성하면 됨!
-
                         ).show()
 
-                        //이거 쓰면댐
-                        Log.d(TAG, "onReceive1: ${getDownloadFileToUri()}")
+                        val mediaMetadataRetriever = MediaMetadataRetriever()
+                        mediaMetadataRetriever.setDataSource(this@MainActivity, getDownloadFileToUri())
 
-                        //여기부터 다운받은 곡 재생시키는 코드
+//                        val albumId = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.ID)
+                        val title
+                            = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: "unknown title"
+                        val artist = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST) ?: "unknown artist"
+                        val genre = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_GENRE) ?: "genre"
+
                         musicviewmodel.selectedPlaylistName=""
                         musicviewmodel.selectedPlayList = PlayListDTO("", mutableListOf<MusicDTO>())
                         musicviewmodel.selectedMusicPosition = -1
-                        musicviewmodel.selectedMusic = MusicDTO(-1, "", -1, "", "")
+                        musicviewmodel.selectedMusic = MusicDTO(-1, title, -1, artist, genre)
                         ApplicationClass.sSharedPreferences.putCurSongList("")
                         ApplicationClass.sSharedPreferences.putSelectedSongPosition(-1)
 //                        ApplicationClass.sSharedPreferences.
