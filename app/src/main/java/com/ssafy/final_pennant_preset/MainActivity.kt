@@ -295,13 +295,18 @@ class MainActivity : AppCompatActivity() {
                 val reason = cursor.getInt(columnReason)
                 cursor.close()
                 when (status) {
-                    DownloadManager.STATUS_SUCCESSFUL -> Toast.makeText(
-                        context,
-                        "다운로드를 완료하였습니다.",
-                        Toast.LENGTH_SHORT
-                        // 여기에서 다운로드 완료 처리하는 코드 작성하면 됨!
+                    DownloadManager.STATUS_SUCCESSFUL -> {
+                        Toast.makeText(
+                            context,
+                            "다운로드를 완료하였습니다.",
+                            Toast.LENGTH_SHORT
+                            // 여기에서 다운로드 완료 처리하는 코드 작성하면 됨!
 
-                    ).show()
+                        ).show()
+
+                        //이거 쓰면댐
+                        Log.d(TAG, "onReceive1: ${getDownloadFileToUri()}")
+                    }
 
                     DownloadManager.STATUS_PAUSED -> Toast.makeText(
                         context,
@@ -317,6 +322,15 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    fun getDownloadFileToUri(): Uri? {
+        val file =
+            File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + mainViewModel.downloadFile)
+        Log.d(TAG, "getDownloadFileToUri: $file")
+        Log.d(TAG, "getDownloadFileToUri: ${file.exists()}")
+        if (file.isFile) return file.toUri()
+        return null
     }
     companion object {
         private const val RC_SIGN_IN = 9001
