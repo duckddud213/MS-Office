@@ -2,7 +2,9 @@ package com.ssafy.final_pennant_preset.service
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
@@ -29,6 +31,10 @@ class MyFirebaseMessageService : FirebaseMessagingService() {
 
     lateinit var builder : NotificationCompat.Builder
 
+    override fun onCreate() {
+        super.onCreate()
+    }
+
     // Foreground, Background 모두 처리하기 위해서는 data에 값을 담아서 넘긴다.
     //https://firebase.google.com/docs/cloud-messaging/android/receive
     @SuppressLint("LongLogTag")
@@ -36,27 +42,32 @@ class MyFirebaseMessageService : FirebaseMessagingService() {
         var messageTitle = ""
         var messageContent = ""
         var messageGenre = ""
+        var messageType = ""
+        var messageUserId = ""
 
-        if(remoteMessage.notification != null){ // notification이 있는 경우 foreground처리
-            //foreground
-            messageTitle= remoteMessage.notification!!.title.toString()
-            messageContent = remoteMessage.notification!!.body.toString()
+//        if(remoteMessage.notification != null){ // notification이 있는 경우 foreground처리
+//            //foreground
+//            messageTitle= remoteMessage.notification!!.title.toString()
+//            messageContent = remoteMessage.notification!!.body.toString()
+//
 
-        }else{  // background 에 있을경우 혹은 foreground에 있을경우 두 경우 모두
+//        }else{  // background 에 있을경우 혹은 foreground에 있을경우 두 경우 모두
             var data = remoteMessage.data
             Log.d(TAG, "data.message: ${data}")
-            Log.d(TAG, "data.message: ${data.get("title")}")
-            Log.d(TAG, "data.message: ${data.get("body")}")
-
+            Log.d(TAG, "data.title: ${data.get("title")}")
+            Log.d(TAG, "data.body: ${data.get("type")}")
             messageTitle = data.get("title").toString()
             messageContent = data.get("body").toString()
             messageGenre = data.get("genre").toString()
-            Log.d(TAG, "onMessageReceived: $messageGenre")
-        }
+            messageType = data.get("type").toString()
+            messageUserId = data.get("userId").toString()
+//        }
 
         val mainIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+
+        if (messageUserId == ApplicationClass.sSharedPreferences.getUID()) return
 
         val mainPendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_MUTABLE)
         var channelId = 100
@@ -106,6 +117,11 @@ class MyFirebaseMessageService : FirebaseMessagingService() {
                 .setAutoCancel(true)
                 .setContentIntent(mainPendingIntent)
 
+        updateMyActivity(this, messageGenre, messageType)
+
+        if (messageType == "delete") return // 삭제일 경우 push x
+        if (messageType == "update") return
+
         NotificationManagerCompat.from(applicationContext).apply {
             if (ActivityCompat.checkSelfPermission(
                     applicationContext,
@@ -118,4 +134,19 @@ class MyFirebaseMessageService : FirebaseMessagingService() {
         }
 
     }
+
+
+    private fun getTopActivityName(): String {
+        val manager = applicationContext.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        return manager.appTasks[0].taskInfo.topActivity!!.shortClassName.substring(1)
+    }
+
+    private fun updateMyActivity(context: Context, genre: String?, type: String?) {
+        val intent = Intent("my_unique_name")
+        intent.putExtra("genre", genre)
+        intent.putExtra("type", type)
+        Log.d(TAG, "updateMyActivity: $genre")
+        context.sendBroadcast(intent)
+    }
+
 }

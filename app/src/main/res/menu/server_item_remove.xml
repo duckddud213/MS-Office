@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
-        android:id="@+id/server_rmItem"
-        android:title="Remove Server Music" />
+        android:id="@+id/server_updateItem"
+        android:title="서버 음악 수정"/>
+
+    <item
+        android:id="@+id/server_removeItem"
+        android:title="서버 음악 삭제" />
 </menu>

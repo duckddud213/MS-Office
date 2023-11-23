@@ -29,8 +29,6 @@ class ApplicationClass : Application() {
         lateinit var sRetrofit: Retrofit
         lateinit var sSharedPreferences: SharedPreferencesUtil
 
-        val DOWNLOAD_PATH = Environment.DIRECTORY_DOWNLOADS + "/msOffice/"
-
         const val SHARED_PREFERENCES_NAME = "Music_Ssafy_OFFICE"
 
         const val X_ACCESS_TOKEN = "X-ACC  ESS-TOKEN"

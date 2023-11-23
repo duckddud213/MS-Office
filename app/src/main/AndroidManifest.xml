@@ -48,11 +48,11 @@
         <activity
             android:name="com.ssafy.final_pennant_preset.MainActivity"
             android:screenOrientation="portrait" />\
-        <receiver android:name="com.ssafy.final_pennant_preset.DownloadCompletedReceiver" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
-            </intent-filter>
-        </receiver>
+<!--        <receiver android:name="com.ssafy.final_pennant_preset.DownloadCompletedReceiver" android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
     </application>
 
 </manifest>

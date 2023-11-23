@@ -8,13 +8,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.Cursor
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.fragment.app.FragmentManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -37,6 +40,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
+import java.net.URI
 
 
 private const val TAG = "MainActivity_싸피"
@@ -48,6 +52,8 @@ class MainActivity : AppCompatActivity() {
     // [END declare_auth]
     private lateinit var googleSignInClient: GoogleSignInClient
     val musicviewmodel : MusicFileViewModel by viewModels()
+
+    private val mainViewModel: MainActivityViewModel by viewModels()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -226,7 +232,6 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-
     @RequiresApi(Build.VERSION_CODES.O)
     fun initNotificationChannel() {
         createNotificationChannel(ApplicationClass.CHANNEL_DANCE, ApplicationClass.CHANNEL_DANCE)
@@ -245,6 +250,74 @@ class MainActivity : AppCompatActivity() {
         notificationManager.createNotificationChannel(channel)
     }
 
+    /**
+     * notification이 왔을 때 재생목록 업데이트 관련
+     */
+    override fun onResume() {
+        super.onResume()
+        registerReceiver(mMessageReceiver, IntentFilter("my_unique_name"))
+        registerReceiver(mDownloadCompletedReceiver, IntentFilter("android.intent.action.DOWNLOAD_COMPLETE"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(mMessageReceiver)
+        unregisterReceiver(mDownloadCompletedReceiver)
+    }
+
+    private val mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val genre = intent.getStringExtra("genre")
+            val type = intent.getStringExtra("type")
+            Log.d(TAG, "onReceive: $genre")
+            Log.d(TAG, "onReceive: $type")
+            genre?.let {
+                if (genre == fragment_server_genre.curGenre) {
+                    // 현재 해당 장르를 보고 있다면 liveData update
+                    mainViewModel.setListWithGenre(genre)
+                }
+            }
+
+        }
+    }
+    private val mDownloadCompletedReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+
+            val downloadManager = context?.getSystemService(DownloadManager::class.java)!!
+            if (intent?.action == "android.intent.action.DOWNLOAD_COMPLETE") {
+                val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
+                val query = DownloadManager.Query()
+                val cursor: Cursor = downloadManager.query(query)
+                cursor.moveToFirst()
+                val columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                val columnReason = cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
+                val status = cursor.getInt(columnIndex)
+                val reason = cursor.getInt(columnReason)
+                cursor.close()
+                when (status) {
+                    DownloadManager.STATUS_SUCCESSFUL -> Toast.makeText(
+                        context,
+                        "다운로드를 완료하였습니다.",
+                        Toast.LENGTH_SHORT
+                        // 여기에서 다운로드 완료 처리하는 코드 작성하면 됨!
+
+                    ).show()
+
+                    DownloadManager.STATUS_PAUSED -> Toast.makeText(
+                        context,
+                        "다운로드가 중단되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    DownloadManager.STATUS_FAILED -> Toast.makeText(
+                        context,
+                        "다운로드가 취소되었습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
     companion object {
         private const val RC_SIGN_IN = 9001
 
