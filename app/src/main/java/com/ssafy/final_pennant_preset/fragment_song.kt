@@ -234,6 +234,7 @@ class fragment_song : Fragment() {
             mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
 
             if(musicviewmodel.checkSameSong){
+                if (player.isPlaying) player.stop()
                 player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
             }
             else player.setMediaItem(mediaItem,0)

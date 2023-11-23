@@ -153,8 +153,8 @@ class fragment_totallist : Fragment() {
 
     //=======================================
     fun savePlayingState() {
-        var duration = MainActivity.getPlayer(requireContext()).duration
-        var position = MainActivity.getPlayer(requireContext()).currentPosition
+        var duration = player.duration
+        var position = player.currentPosition
 
         var posStr = String.format(
             "%02d:%02d",

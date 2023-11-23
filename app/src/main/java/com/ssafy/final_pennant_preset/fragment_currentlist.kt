@@ -73,7 +73,7 @@ class fragment_currentlist : Fragment() {
         list = ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
         musicviewmodel.selectedPlayList = PlayListDTO(musicviewmodel.selectedPlaylistName, list)
 
-        if (!musicviewmodel.selectedPlaylistName.equals("")) {
+        if (musicviewmodel.selectedPlaylistName.isNotEmpty()) {
             //선택된 재생목록이 있는 경우
             binding.tvCurrentList.text = musicviewmodel.selectedPlaylistName
             for (i in 0..musicviewmodel.playList.size - 1) {
@@ -105,50 +105,6 @@ class fragment_currentlist : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        player = MainActivity.getPlayer(requireContext())
-        //======================================
-//        if (musicviewmodel.isPlaying) {
-//            //음악 재생 중에 넘어온 경우
-//
-//            musicviewmodel.playerNotificationManager =
-//                PlayerNotificationManager.Builder(requireActivity(), 5, "MS Office")
-//                    .setNotificationListener(object :
-//                        PlayerNotificationManager.NotificationListener {
-//                        override fun onNotificationPosted(
-//                            notificationId: Int,
-//                            notification: Notification,
-//                            ongoing: Boolean
-//                        ) {
-//                            super.onNotificationPosted(notificationId, notification, ongoing)
-//                            if (ongoing) {
-//                                Log.d(TAG, "onNotificationPosted: 재생 중이다")
-//                                Log.d(TAG, "onNotificationPosted: ${notification.actions}")
-//                            } else {
-//                                Log.d(TAG, "onNotificationPosted: 멈췄다")
-//                            }
-//                        }
-//                    })
-//                    .setChannelImportance(NotificationManager.IMPORTANCE_HIGH)
-//                    .setSmallIconResourceId(R.drawable.music_ssafy_office)
-//                    .setChannelDescriptionResourceId(R.string.app_name)
-//                    .setPreviousActionIconResourceId(R.drawable.img_skipprevious)
-//                    .setPauseActionIconResourceId(R.drawable.img_pause)
-//                    .setPlayActionIconResourceId(R.drawable.img_play)
-//                    .setNextActionIconResourceId(R.drawable.img_skipnext)
-//                    .setChannelNameResourceId(R.string.app_name)
-//                    .build()
-//
-//            musicviewmodel.playerNotificationManager.setPlayer(player)
-//
-//            var mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
-//            player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
-//            player.prepare()
-//            player.play()
-//
-//            savePlayingState()
-//        }
-
-        //=======================================
 
         binding.fabAddNewPlayList.setOnClickListener {
             if (musicviewmodel.selectedPlaylistName.equals("")) {
@@ -162,13 +118,6 @@ class fragment_currentlist : Fragment() {
                     .addToBackStack("addSongToPlayList").commit()
             }
         }
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        //프래그먼트간 화면 이동 시 음악 재생 진행률 정보 전달
-//        player.stop()
-//        player.release()
     }
 
     //=======================================
