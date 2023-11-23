@@ -175,7 +175,7 @@ class fragment_server : Fragment() {
 
         builder.apply {
             setView(inflater)
-            setPositiveButton("확인") { dialog, _ ->
+            setPositiveButton("확인") { _, _ ->
             }
         }
 

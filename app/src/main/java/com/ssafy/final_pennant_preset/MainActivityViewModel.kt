@@ -1,27 +1,26 @@
 package com.ssafy.final_pennant_preset
 
-import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.dto.ServerMusicDTO
 import com.ssafy.final_pennant_preset.util.RetrofitUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 
 
-private const val TAG = "ServerGenreViewModel_싸피"
-class ServerViewModel : ViewModel() {
+private const val TAG = "MainActivityViewModel_싸피"
+class MainActivityViewModel : ViewModel() {
 
     private val _musicWithGenre = MutableLiveData<List<ServerMusicDTO>>()
     val musicWithGenre: LiveData<List<ServerMusicDTO>>
         get() = _musicWithGenre
 
-    fun getListWithGenre(genre: String) {
-        viewModelScope.launch {
+    fun setListWithGenre(genre: String) {
+        CoroutineScope(Dispatchers.Main).launch {
             try {
                 Log.d(TAG, "getListWithGenre: $genre")
                 _musicWithGenre.value = RetrofitUtil.musicService.getMusicListByGenre(genre)
@@ -33,20 +32,31 @@ class ServerViewModel : ViewModel() {
     }
 
     fun deleteMusic(genre: String, musicId: String) {
-//        val uid = ApplicationClass.sSharedPreferences.getUID()!!
 
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.Main).launch {
             try {
                 RetrofitUtil.musicService.deleteMusic(musicId)
-                getListWithGenre(genre)
+                setListWithGenre(genre)
             } catch (e: Exception) {
                 Log.d(TAG, "deleteMusic: 파일 삭제 실패")
             }
         }
     }
 
-    fun uploadMusic(genre: String, fileUri: String) {
-        File(fileUri)
+    fun updateMusic(dto: ServerMusicDTO) {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                Log.d(TAG, "updateMusic1: ${dto.musicId}")
+                Log.d(TAG, "updateMusic1: ${dto.musicGenre}")
+                Log.d(TAG, "updateMusic1: ${dto.musicName}")
+                val log = RetrofitUtil.musicService.updateMusic(dto)
+                Log.d(TAG, "updateMusic2: $log")
+                setListWithGenre(dto.musicGenre)
+            } catch (e: Exception) {
+                Log.d(TAG, "updateMusic2: 파일 갱신 실패")
+                Log.d(TAG, "updateMusic: $e")
+            }
+        }
     }
-
+    
 }

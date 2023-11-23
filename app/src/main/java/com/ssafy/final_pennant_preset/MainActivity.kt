@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
@@ -30,6 +31,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.ActivityMainBinding
 import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 import com.ssafy.final_pennant_preset.util.RetrofitUtil
 import retrofit2.Call
 import retrofit2.Callback
@@ -45,6 +47,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     // [END declare_auth]
     private lateinit var googleSignInClient: GoogleSignInClient
+
+    private val mainViewModel: MainActivityViewModel by viewModels()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -237,6 +241,35 @@ class MainActivity : AppCompatActivity() {
         notificationManager.createNotificationChannel(channel)
     }
 
+
+    /**
+     * notification이 왔을 때 재생목록 업데이트 관련
+     */
+    override fun onResume() {
+        super.onResume()
+        registerReceiver(mMessageReceiver, IntentFilter("my_unique_name"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(mMessageReceiver)
+    }
+
+    private val mMessageReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val genre = intent.getStringExtra("genre")
+            val type = intent.getStringExtra("type")
+            Log.d(TAG, "onReceive: $genre")
+            Log.d(TAG, "onReceive: $type")
+            genre?.let {
+                if (genre == fragment_server_genre.curGenre) {
+                    // 현재 해당 장르를 보고 있다면 liveData update
+                    mainViewModel.setListWithGenre(genre)
+                }
+            }
+
+        }
+    }
     companion object {
         private const val RC_SIGN_IN = 9001
 

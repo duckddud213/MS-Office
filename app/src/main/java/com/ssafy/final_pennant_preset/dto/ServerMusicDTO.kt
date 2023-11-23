@@ -13,6 +13,6 @@ data class ServerMusicDTO (
     , @SerializedName("musicUrl") val musicUrl: String
     ) {
     override fun toString(): String {
-        return musicName
+        return musicName.replace(".mp3", "")
     }
 }

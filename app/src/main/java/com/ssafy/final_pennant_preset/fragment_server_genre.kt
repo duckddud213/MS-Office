@@ -1,26 +1,38 @@
 package com.ssafy.final_pennant_preset
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.graphics.ColorFilter
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.ContextMenu
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.annotations.SerializedName
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.FragmentServerGenreBinding
 import com.ssafy.final_pennant_preset.dto.ServerMusicDTO
 import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.service.MusicDownloader
 import com.ssafy.final_pennant_preset.util.RetrofitUtil
 
-private const val GENRE = ApplicationClass.CHANNEL_POP
+private const val GENRE = ApplicationClass.CHANNEL_IDOL
 
 private const val TAG = "fragment_server_genre_싸피"
 class fragment_server_genre : Fragment() {
@@ -32,11 +44,12 @@ class fragment_server_genre : Fragment() {
 
     private lateinit var mainActivity: MainActivity
 
-    private val serverViewModel : ServerViewModel by viewModels()
     private lateinit var serverMusic : ArrayList<ServerMusicDTO>
 
     private lateinit var musicListAdapter : MusicListAdapter
     private lateinit var downLoader : MusicDownloader
+
+    private val mainActivityViewModel:MainActivityViewModel by activityViewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -55,13 +68,15 @@ class fragment_server_genre : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         registerObserver()
-        serverViewModel.getListWithGenre(genre!!)
-        musicListAdapter = MusicListAdapter(arrayListOf())
+        mainActivityViewModel.setListWithGenre(genre!!)
+
+        musicListAdapter = MusicListAdapter()
 
         downLoader = MusicDownloader(mainActivity)
 
         musicListAdapter.myItemClickListener = object : ItemClickListener{
             override fun onMyClick(view: View, dto: ServerMusicDTO) {
+                Toast.makeText(mainActivity, "${dto}를 다운로드합니다", Toast.LENGTH_SHORT).show()
                 downLoader.downloadFile(dto.musicUrl, dto.musicName)
             }
         }
@@ -69,7 +84,10 @@ class fragment_server_genre : Fragment() {
         binding.rvServerGenre.apply {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
             adapter = musicListAdapter
+            addItemDecoration(CustomItemDecoration(requireContext()))
         }
+
+        binding.tvServerDownloadMusic.text = "Download - $genre"
     }
 
     override fun onAttach(context: Context) {
@@ -78,21 +96,14 @@ class fragment_server_genre : Fragment() {
     }
 
     fun registerObserver() {
-        serverViewModel.musicWithGenre.observe(viewLifecycleOwner) {
-            serverMusic = it as ArrayList<ServerMusicDTO>
-            Log.d(TAG, "registerObserver: $serverMusic")
-            binding.rvServerGenre.apply {
-                musicListAdapter.genreList = it
-                adapter = musicListAdapter
-                musicListAdapter.notifyDataSetChanged()
-            }
+        mainActivityViewModel.musicWithGenre.observe(viewLifecycleOwner) {
+            Log.d(TAG, "registerObserver: $it")
+            musicListAdapter.submitList(it.toMutableList())
         }
     }
 
-
-    inner class MusicListAdapter(var genreList: MutableList<ServerMusicDTO>) :
-
-        RecyclerView.Adapter<MusicListAdapter.CustomViewHolder>() {
+    inner class MusicListAdapter :
+        ListAdapter<ServerMusicDTO, fragment_server_genre.MusicListAdapter.CustomViewHolder> (ServerMusicComparator) {
         inner class CustomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
             View.OnCreateContextMenuListener {
 
@@ -107,6 +118,15 @@ class fragment_server_genre : Fragment() {
                     myItemClickListener.onMyClick(it, music)
                 }
                 tv_genre.setOnCreateContextMenuListener(this)
+
+                if (uid == music.uploadUser) {
+                    tv_genre.setBackgroundResource(R.drawable.gradient)
+                    // background color
+                    tv_genre.background.alpha = 100
+                    // 투명도
+                }
+
+//                tv_genre.background =
             }
 
             override fun onCreateContextMenu(
@@ -117,11 +137,18 @@ class fragment_server_genre : Fragment() {
                 requireActivity().apply {
                     if (uid == serverMusic.uploadUser) {
                         menuInflater.inflate(R.menu.server_item_remove, menu)
-                        menu?.findItem(R.id.server_rmItem)
+                        menu?.findItem(R.id.server_updateItem)
                             ?.setOnMenuItemClickListener {
-                            serverViewModel.deleteMusic(genre!!, serverMusic.musicId)
-                            musicListAdapter.genreList.remove(serverMusic)
-                            true
+                                showDialogUpdate(serverMusic)
+                                true
+                        }
+
+                        menu?.findItem(R.id.server_removeItem)
+                            ?.setOnMenuItemClickListener {
+                                mainActivityViewModel.deleteMusic(genre!!, serverMusic.musicId)
+//                                musicListAdapter.getItem(layoutPosition). .genreList.remove(serverMusic)
+//                                musicListAdapter.genreList.remove(serverMusic)
+                                true
                         }
                     }
                 }
@@ -135,26 +162,63 @@ class fragment_server_genre : Fragment() {
         }
 
         override fun onBindViewHolder(holder: CustomViewHolder, position: Int) {
-            holder.bind(genreList.get(position))
-        }
-
-        override fun getItemCount(): Int {
-            return genreList.size
+            holder.bind(getItem(position))
         }
     }
-
 
     interface ItemClickListener{
         fun onMyClick(view: View, dto: ServerMusicDTO)
     }
+    @SuppressLint("MissingInflatedId")
+    private fun showDialogUpdate(dto: ServerMusicDTO) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+        val inflater = layoutInflater.inflate(R.layout.dialog_updatemusic, null)
+        val et_update = inflater.findViewById<EditText>(R.id.et_update)
+        et_update.setTextColor(Color.BLACK)
+
+        et_update.setText(dto.toString())
+
+        builder.apply {
+            setView(inflater)
+            setPositiveButton("수정") { dialogInterface, i -> // 안드로이드 버전에 따라 다를 수 있음.
+                if (et_update.text.toString().isNullOrEmpty()) {
+                    Toast.makeText(requireContext(), "이름을 확인해 주세요", Toast.LENGTH_SHORT).show()
+                } else {
+                    var updateDto = ServerMusicDTO(
+                        dto.musicId
+                        , dto.uploadUser
+                        , et_update.text.toString() + ".mp3" // name
+                        , dto.musicS3Key
+                        , dto.musicGenre // genre
+                        , dto.musicUrl )
+                    mainActivityViewModel.updateMusic(updateDto)
+                    Toast.makeText(requireContext(), "수정되었습니다", Toast.LENGTH_SHORT).show()
+                }
+            }
+            setNegativeButton("취소") { dialogInterface, _ -> dialogInterface.cancel() }
+        }
+        builder.create().show()
+    }
 
     companion object {
+
+        var curGenre: String = ApplicationClass.CHANNEL_ROCK
         @JvmStatic
         fun newInstance(genre: String) =
             fragment_server_genre().apply {
                 arguments = Bundle().apply {
                     putString(GENRE, genre)
                 }
+                curGenre = genre
             }
+        object ServerMusicComparator: DiffUtil.ItemCallback<ServerMusicDTO>() {
+            override fun areItemsTheSame(oldItem: ServerMusicDTO, newItem: ServerMusicDTO): Boolean {
+                return oldItem.hashCode() == newItem.hashCode()
+            }
+            override fun areContentsTheSame(oldItem: ServerMusicDTO, newItem: ServerMusicDTO): Boolean {
+                return oldItem.musicId == newItem.musicId
+            }
+
+        }
     }
 }
