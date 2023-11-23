@@ -148,6 +148,7 @@ class fragment_server_genre : Fragment() {
                         menu?.findItem(R.id.server_removeItem)
                             ?.setOnMenuItemClickListener {
                                 mainActivityViewModel.deleteMusic(genre!!, serverMusic.musicId)
+                                Toast.makeText(mainActivity, "${serverMusic.toString()}을 삭제합니다", Toast.LENGTH_SHORT).show()
                                 true
                         }
                     }
