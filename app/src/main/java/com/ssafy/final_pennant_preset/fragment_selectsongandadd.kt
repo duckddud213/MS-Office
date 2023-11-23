@@ -138,8 +138,9 @@ class fragment_selectsongandadd : Fragment() {
             player.release()
 
             requireActivity().apply {
-                supportFragmentManager.beginTransaction().replace(R.id.framecontainer, fragment_currentlist()).commit()
                 supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                supportFragmentManager.beginTransaction().replace(R.id.framecontainer, fragment_currentlist()).commit()
             }
 
 

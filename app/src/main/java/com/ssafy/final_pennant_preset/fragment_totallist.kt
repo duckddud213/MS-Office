@@ -318,6 +318,8 @@ class fragment_totallist : Fragment() {
             CoroutineScope(Dispatchers.Main).launch {
                 RetrofitUtil.musicService.uploadMusic(ApplicationClass.sSharedPreferences.getUID()!!,genreName.lowercase(),mp3data)
             }
+
+            Toast.makeText(requireContext(),"서버 업로드 완료",Toast.LENGTH_SHORT).show()
         }
 
         private fun getFilePathUri(uri: Uri) : String{
