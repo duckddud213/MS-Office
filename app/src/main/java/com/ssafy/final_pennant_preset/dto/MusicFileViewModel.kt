@@ -28,6 +28,8 @@ class MusicFileViewModel:ViewModel() {
 
     var selectedPlaylistName : String = ""
 
+    var downloadedUri : String = ""
+
     var isPlaying : Boolean = false
     var isPlayingOn : Long = -1
     var checkSameSong:Boolean = true

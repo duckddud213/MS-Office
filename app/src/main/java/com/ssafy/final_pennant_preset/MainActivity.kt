@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.Cursor
+import android.media.browse.MediaBrowser.MediaItem
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -34,7 +35,9 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.ActivityMainBinding
 import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
+import com.ssafy.final_pennant_preset.dto.PlayListDTO
 import com.ssafy.final_pennant_preset.util.RetrofitUtil
 import retrofit2.Call
 import retrofit2.Callback
@@ -306,6 +309,19 @@ class MainActivity : AppCompatActivity() {
 
                         //이거 쓰면댐
                         Log.d(TAG, "onReceive1: ${getDownloadFileToUri()}")
+
+                        //여기부터 다운받은 곡 재생시키는 코드
+                        musicviewmodel.selectedPlaylistName=""
+                        musicviewmodel.selectedPlayList = PlayListDTO("", mutableListOf<MusicDTO>())
+                        musicviewmodel.selectedMusicPosition = -1
+                        musicviewmodel.selectedMusic = MusicDTO(-1, "", -1, "", "")
+                        ApplicationClass.sSharedPreferences.putCurSongList("")
+                        ApplicationClass.sSharedPreferences.putSelectedSongPosition(-1)
+//                        ApplicationClass.sSharedPreferences.
+                        musicviewmodel.downloadedUri = getDownloadFileToUri().toString()
+
+                        supportFragmentManager.popBackStack(null,FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                        supportFragmentManager.beginTransaction().replace(R.id.framecontainer, fragment_song()).commit()
                     }
 
                     DownloadManager.STATUS_PAUSED -> Toast.makeText(

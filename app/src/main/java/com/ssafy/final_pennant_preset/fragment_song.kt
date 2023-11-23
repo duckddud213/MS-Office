@@ -248,11 +248,20 @@ class fragment_song : Fragment() {
             player.play()
             musicviewmodel.isPlaying = true
         }
-        else if(!musicviewmodel.selectedMusic.equals(MusicDTO(-1, "", -1, "", ""))){
+        else{
             //한 곡 재생인 경우
-            mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
+            if(musicviewmodel.downloadedUri!=""){
+                Log.d(TAG, "onViewCreated: 여기로 와주세요 제발 ")
+                mediaItem = MediaItem.fromUri(getDownloadFileToUri()!!)
                 player.setMediaItem(mediaItem, 0)
-            binding.playControlImageView.setImageResource(R.drawable.img_pause)
+                binding.playControlImageView.setImageResource(R.drawable.img_pause)
+                musicviewmodel.downloadedUri=""
+            }
+            else if(!musicviewmodel.selectedMusic.equals(MusicDTO(-1, "", -1, "", ""))){
+                mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
+                player.setMediaItem(mediaItem, 0)
+                binding.playControlImageView.setImageResource(R.drawable.img_pause)
+            }
             player.prepare()
             player.play()
             musicviewmodel.isPlaying = true

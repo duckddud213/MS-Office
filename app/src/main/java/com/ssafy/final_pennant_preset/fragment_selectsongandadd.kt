@@ -17,6 +17,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -52,7 +53,7 @@ class fragment_selectsongandadd : Fragment() {
     //=======================================
 
     fun checkSameSongData(Name1: String, Name2: String, Artist1: String, Artist2: String): Boolean {
-        if (Name1==Name2 && Artist1==Artist2) {
+        if (Name1 == Name2 && Artist1 == Artist2) {
             return true
         }
 
@@ -62,6 +63,16 @@ class fragment_selectsongandadd : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         musicfileviewmodel.checkedSongList.clear()
+
+        for (i in 0..musicfileviewmodel.MusicList.size - 1) {
+            musicfileviewmodel.checkedSongList.add(
+                checkboxSongData(
+                    musicfileviewmodel.MusicList[i].title.toString(),
+                    musicfileviewmodel.MusicList[i].artist.toString(),
+                    false
+                )
+            )
+        }
     }
 
     override fun onCreateView(
@@ -93,7 +104,13 @@ class fragment_selectsongandadd : Fragment() {
                     var pArtist = musicfileviewmodel.MusicList[j].artist
                     var isDup = false
 
-                    if (checkSameSongData(cName, pName, cArtist, pArtist)) {
+                    if (checkSameSongData(
+                            cName,
+                            pName,
+                            cArtist,
+                            pArtist
+                        ) && musicfileviewmodel.checkedSongList[i].checked
+                    ) {
                         for (k in 0..musicfileviewmodel.selectedPlayList.songlist.size - 1) {
                             //이미 현재 재생목록에 있는 곡일 경우 추가하지 않음
                             if (checkSameSongData(
@@ -120,8 +137,12 @@ class fragment_selectsongandadd : Fragment() {
             player.stop()
             player.release()
 
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.framecontainer, fragment_currentlist()).commit()
+            requireActivity().apply {
+                supportFragmentManager.beginTransaction().replace(R.id.framecontainer, fragment_currentlist()).commit()
+                supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            }
+
+
 
             if (musicfileviewmodel.checkedSongList.size == 0) {
                 Toast.makeText(requireContext(), "재생 목록에 추가된 곡이 없습니다.", Toast.LENGTH_SHORT).show()
@@ -252,14 +273,18 @@ class fragment_selectsongandadd : Fragment() {
             var checkBox = itemView.findViewById<CheckBox>(R.id.checkBox2)
             var img = itemView.findViewById<ImageView>(R.id.ivSongImg2)
 
-            fun bind(songlist: MusicDTO) {
+            fun bind(songlist: MusicDTO, songChecked: checkboxSongData) {
                 title.text = songlist.title
                 artist.text = songlist.artist
                 genre.text = songlist.genre
+                checkBox.isChecked = songChecked.checked
 
-                Log.d(TAG, "bind: 현재 bind된 데이터 => ${title.text} / ${artist.text} / ${genre.text} / ${checkBox.isChecked} / ")
-                
-                for(i in 0..musicfileviewmodel.checkedSongList.size-1){
+                Log.d(
+                    TAG,
+                    "bind: 현재 bind된 데이터 => ${title.text} / ${artist.text} / ${genre.text} / ${checkBox.isChecked} / "
+                )
+
+                for (i in 0..musicfileviewmodel.checkedSongList.size - 1) {
                     Log.d(TAG, "bind: 현재 checkedList는 : ${musicfileviewmodel.checkedSongList[i]}")
                 }
 
@@ -273,30 +298,37 @@ class fragment_selectsongandadd : Fragment() {
                 if (insertImg != null) {
                     var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                     img.setImageBitmap(bitmap)
-                }
-                else{
+                } else {
                     img.setImageResource(R.drawable.music_ssafy_office)
                 }
 
                 checkBox.setOnClickListener {
-                    var checked =
-                        checkboxSongData(songlist.title, songlist.artist, checkBox.isChecked)
-
-                    if (!checkBox.isChecked) {
-                        for (i in 0..musicfileviewmodel.checkedSongList.size - 1) {
-                            Log.d(TAG, "bind: 값 확인 ${musicfileviewmodel.checkedSongList[i].songtitle} / ${checked.songtitle} / ${musicfileviewmodel.checkedSongList[i].songartist} / ${checked.songartist}")
-                            if (checkSameSongData(musicfileviewmodel.checkedSongList[i].songtitle,checked.songtitle,musicfileviewmodel.checkedSongList[i].songartist,checked.songartist)) {
-                                musicfileviewmodel.checkedSongList.removeAt(i)
-                                Log.d(TAG, "bind: 삭제 위치 : ${i} / ${adapterPosition}")
-                                Log.d(TAG,"bind: 현재 크기는 ${musicfileviewmodel.checkedSongList.size}")
-                                break
-                            }
-                        }
+//                    var checked =
+//                        checkboxSongData(songlist.title, songlist.artist, checkBox.isChecked)
+//
+//                    if (!checkBox.isChecked) {
+//                        for (i in 0..musicfileviewmodel.checkedSongList.size - 1) {
+//                            Log.d(TAG, "bind: 값 확인 ${musicfileviewmodel.checkedSongList[i].songtitle} / ${checked.songtitle} / ${musicfileviewmodel.checkedSongList[i].songartist} / ${checked.songartist}")
+//                            if (checkSameSongData(musicfileviewmodel.checkedSongList[i].songtitle,checked.songtitle,musicfileviewmodel.checkedSongList[i].songartist,checked.songartist)) {
+//                                musicfileviewmodel.checkedSongList.removeAt(i)
+//                                Log.d(TAG, "bind: 삭제 위치 : ${i} / ${adapterPosition}")
+//                                Log.d(TAG,"bind: 현재 크기는 ${musicfileviewmodel.checkedSongList.size}")
+//                                break
+//                            }
+//                        }
+//                    } else {
+//                        musicfileviewmodel.checkedSongList.add(checked)
+//                    }
+//                    for (i in 0..musicfileviewmodel.checkedSongList.size - 1) {
+//                        Log.d(TAG, "bind: ${i}번 데이터 => ${musicfileviewmodel.checkedSongList[i]}")
+//                    }
+                    songChecked.checked = checkBox.isChecked
+                    if (songChecked.checked) {
+                        //체크된 경우 리스트에 저장
+                        songChecked.songtitle = title.text.toString()
+                        songChecked.songartist = artist.text.toString()
                     } else {
-                        musicfileviewmodel.checkedSongList.add(checked)
-                    }
-                    for (i in 0..musicfileviewmodel.checkedSongList.size - 1) {
-                        Log.d(TAG, "bind: ${i}번 데이터 => ${musicfileviewmodel.checkedSongList[i]}")
+
                     }
                 }
             }
@@ -314,7 +346,7 @@ class fragment_selectsongandadd : Fragment() {
             holder: AllSongListAdapter.AllSongListViewHolder,
             position: Int
         ) {
-            holder.bind(songlist.get(position))
+            holder.bind(songlist.get(position), musicfileviewmodel.checkedSongList[position])
         }
 
         override fun getItemCount(): Int {
