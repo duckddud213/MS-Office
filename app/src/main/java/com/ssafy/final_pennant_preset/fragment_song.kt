@@ -147,19 +147,19 @@ class fragment_song : Fragment() {
                 binding.trackTextView.text = musicviewmodel.selectedMusic.title
                 binding.artistTextView.text = musicviewmodel.selectedMusic.artist
 
-                var musicImg = MediaMetadataRetriever()
-                musicImg.setDataSource(
-                    requireContext(),
-                    ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
-                )
-                var insertImg = musicImg.embeddedPicture
-                if (insertImg != null) {
-                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
-                    binding.coverImageView.setImageBitmap(bitmap)
-                }
-                else{
-                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
-                }
+//                var musicImg = MediaMetadataRetriever()
+//                musicImg.setDataSource(
+//                    requireContext(),
+//                    ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+//                )
+//                var insertImg = musicImg.embeddedPicture
+//                if (insertImg != null) {
+//                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+//                    binding.coverImageView.setImageBitmap(bitmap)
+//                }
+//                else{
+//                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+//                }
             }
         } else {
             //재생목록이 있는 경우
@@ -255,7 +255,6 @@ class fragment_song : Fragment() {
                 mediaItem = MediaItem.fromUri(getDownloadFileToUri()!!)
                 player.setMediaItem(mediaItem, 0)
                 binding.playControlImageView.setImageResource(R.drawable.img_pause)
-                musicviewmodel.downloadedUri=""
             }
             else if(!musicviewmodel.selectedMusic.equals(MusicDTO(-1, "", -1, "", ""))){
                 mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
@@ -405,14 +404,36 @@ class fragment_song : Fragment() {
         if(musicviewmodel.selectedMusicPosition==-1&&musicviewmodel.selectedPlaylistName==""&&musicviewmodel.selectedPlayList.equals(PlayListDTO("", mutableListOf<MusicDTO>()))){
             //한 곡 재생인 경우 데이터 재바인딩 과정 불필요
 
-            Log.d(TAG, "initPlayControlButtons: 설마 여긴 아니지?")
-            binding.skipNextImageView.setOnClickListener {
-                player.setMediaItem(mediaItem, 0) // startPositionsMs=0 초 부터 시작
-                player.play()
+            if(musicviewmodel.downloadedUri!=""){
+                binding.trackTextView.text = musicviewmodel.selectedMusic.title
+                binding.artistTextView.text = musicviewmodel.selectedMusic.artist
+
+//                var musicImg = MediaMetadataRetriever()
+//                Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
+//                musicImg.setDataSource(
+//                    requireContext(),
+//                    ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+//                )
+//                var insertImg = musicImg.embeddedPicture
+//                if (insertImg != null) {
+//                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+//                    binding.coverImageView.setImageBitmap(bitmap)
+//                }
+//                else{
+//                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+//                }
             }
-            binding.skipPrevImageView.setOnClickListener {
-                player.setMediaItem(mediaItem, 0) // startPositionsMs=0 초 부터 시작
-                player.play()
+
+            else{
+                Log.d(TAG, "initPlayControlButtons: 설마 여긴 아니지?")
+                binding.skipNextImageView.setOnClickListener {
+                    player.setMediaItem(mediaItem, 0) // startPositionsMs=0 초 부터 시작
+                    player.play()
+                }
+                binding.skipPrevImageView.setOnClickListener {
+                    player.setMediaItem(mediaItem, 0) // startPositionsMs=0 초 부터 시작
+                    player.play()
+                }
             }
         }
         else{
@@ -546,37 +567,43 @@ class fragment_song : Fragment() {
         ) {
             Log.d(TAG, "updateSeekUi: ")
 
-            musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition + 1
-            musicviewmodel.selectedMusicPosition =
-                musicviewmodel.selectedMusicPosition % musicviewmodel.selectedPlayList.songlist.size
+            if(musicviewmodel.downloadedUri==""){
+                musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition + 1
+                musicviewmodel.selectedMusicPosition =
+                    musicviewmodel.selectedMusicPosition % musicviewmodel.selectedPlayList.songlist.size
 
-            musicviewmodel.selectedMusic =
-                musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition]
-            binding.trackTextView.text = musicviewmodel.selectedMusic.title
-            binding.artistTextView.text = musicviewmodel.selectedMusic.artist
+                musicviewmodel.selectedMusic =
+                    musicviewmodel.selectedPlayList.songlist[musicviewmodel.selectedMusicPosition]
+                binding.trackTextView.text = musicviewmodel.selectedMusic.title
+                binding.artistTextView.text = musicviewmodel.selectedMusic.artist
 
-            ApplicationClass.sSharedPreferences.putSelectedSongPosition(musicviewmodel.selectedMusicPosition)
+                ApplicationClass.sSharedPreferences.putSelectedSongPosition(musicviewmodel.selectedMusicPosition)
 
-            var musicImg = MediaMetadataRetriever()
-            Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
-            musicImg.setDataSource(
-                requireContext(),
-                ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
-            )
-            var insertImg = musicImg.embeddedPicture
-            if (insertImg != null) {
-                var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
-                binding.coverImageView.setImageBitmap(bitmap)
+                var musicImg = MediaMetadataRetriever()
+                Log.d(TAG, "onCreateView: ${musicviewmodel.selectedMusic.id}")
+                musicImg.setDataSource(
+                    requireContext(),
+                    ContentUris.withAppendedId(uri, musicviewmodel.selectedMusic.id)
+                )
+                var insertImg = musicImg.embeddedPicture
+                if (insertImg != null) {
+                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+                    binding.coverImageView.setImageBitmap(bitmap)
+                }
+                else{
+                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+                }
+                playMusic(musicviewmodel.selectedMusicPosition)
+                musicviewmodel.downloadedUri=""
             }
             else{
-                binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+                player.stop()
             }
 
             if (binding.playListGroup.isVisible) {
                 binding.playListGroup.isVisible = !binding.playListGroup.isVisible
             }
 
-            playMusic(musicviewmodel.selectedMusicPosition)
         }
     }
 

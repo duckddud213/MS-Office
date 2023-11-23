@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="130dp"
     android:layout_marginTop="8dp"
     android:orientation="vertical">
 
@@ -13,15 +13,18 @@
         android:layout_height="60dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
+        android:src="@drawable/music_ssafy_office"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tvTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/tvTitle"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="TextView"
+        android:fontFamily="@font/bmjua"
         android:textSize="25sp"
         android:textAlignment="viewStart"
         android:paddingEnd="40dp"
@@ -34,6 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="artist"
+        android:fontFamily="@font/bmjua"
         android:textAlignment="viewEnd"
         android:paddingRight="30dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,6 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
+        android:fontFamily="@font/bmjua"
         android:textAlignment="viewEnd"
         android:paddingRight="30dp"
         app:layout_constraintStart_toStartOf="parent"

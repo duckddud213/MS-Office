@@ -20,6 +20,7 @@
             android:paddingTop="15dp"
             android:paddingBottom="15dp"
             android:text="Download Music"
+            android:fontFamily="@font/jalnan"
             android:textSize="32sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"

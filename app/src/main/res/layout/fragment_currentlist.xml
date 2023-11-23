@@ -18,6 +18,7 @@
             android:paddingTop="15dp"
             android:paddingBottom="15dp"
             android:text="선택된 재생목록 없음"
+            android:fontFamily="@font/jalnan"
             android:textSize="32sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

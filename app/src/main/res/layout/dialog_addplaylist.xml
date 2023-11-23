@@ -16,6 +16,7 @@
             android:background="#DDF2FD"
             android:gravity="center"
             android:text="재생목록 생성"
+            android:fontFamily="@font/jalnan"
             android:textSize="30sp" />
 
         <EditText
@@ -24,6 +25,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:hint="입력하세요"
+            android:fontFamily="@font/maplestorylight"
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
             android:layout_marginTop="20dp"
@@ -43,6 +45,7 @@
                 android:layout_height="40dp"
                 android:layout_marginEnd="20dp"
                 android:background="#B4BDFF"
+                android:fontFamily="@font/maplestorylight"
                 android:text="취소" />
 
             <androidx.appcompat.widget.AppCompatButton
@@ -50,6 +53,7 @@
                 android:layout_width="150dp"
                 android:layout_height="40dp"
                 android:background="#ffc8dd"
+                android:fontFamily="@font/maplestorylight"
                 android:text="확인" />
         </LinearLayout>
 

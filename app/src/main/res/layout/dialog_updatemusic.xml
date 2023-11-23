@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:textSize="24sp"
         tools:text = "sample"
+        android:fontFamily="@font/jalnan"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

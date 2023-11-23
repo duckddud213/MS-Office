@@ -19,6 +19,7 @@
             android:paddingTop="15dp"
             android:paddingBottom="15dp"
             android:text="전체 재생목록"
+            android:fontFamily="@font/jalnan"
             android:textSize="32sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

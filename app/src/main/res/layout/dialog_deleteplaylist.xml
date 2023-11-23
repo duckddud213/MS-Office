@@ -16,6 +16,7 @@
             android:background="#DDF2FD"
             android:gravity="center"
             android:text="재생목록 삭제"
+            android:fontFamily="@font/jalnan"
             android:textSize="30sp" />
 
         <TextView
@@ -28,6 +29,7 @@
             android:layout_marginTop="20dp"
             android:layout_marginBottom="10dp"
             android:text="재생목록 []을 삭제하시겠습니까?"
+            android:fontFamily="@font/bmjua"
             android:textSize="20sp" />
 
         <LinearLayout
@@ -43,13 +45,15 @@
                 android:layout_height="40dp"
                 android:layout_marginEnd="20dp"
                 android:background="#B4BDFF"
-                android:text="취소" />
+                android:text="취소"
+                android:fontFamily="@font/bmjua"/>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnDeletePlayListYes"
                 android:layout_width="150dp"
                 android:layout_height="40dp"
                 android:background="#ffc8dd"
+                android:fontFamily="@font/bmjua"
                 android:text="확인" />
         </LinearLayout>
 

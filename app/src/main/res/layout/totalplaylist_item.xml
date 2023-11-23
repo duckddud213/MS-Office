@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="TextView"
+        android:fontFamily="@font/bmjua"
         android:textAlignment="viewStart"
         android:textSize="24sp"
         android:paddingTop="15dp"
