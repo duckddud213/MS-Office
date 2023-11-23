@@ -6,6 +6,7 @@ import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.PendingIntent
 import android.content.ContentUris
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -66,9 +67,9 @@ class fragment_song : Fragment() {
     val mainActivityViewModel: MainActivityViewModel by activityViewModels()
 
     var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+    private lateinit var player: ExoPlayer
 //    lateinit var playerNotificationManager: PlayerNotificationManager
 
-    private lateinit var player: ExoPlayer
     private var list = mutableListOf<MusicDTO>()
     lateinit var mediaItem: MediaItem
 
@@ -76,6 +77,10 @@ class fragment_song : Fragment() {
         updateSeek()
     }
 
+    override fun onAttach(context: Context) {
+        player = MainActivity.getPlayer(context)
+        super.onAttach(context)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -199,7 +204,7 @@ class fragment_song : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        player = ExoPlayer.Builder(requireContext()).build()
+//        player = MainActivity.getPlayer(requireContext())
 //        binding.playerView.showTimeoutMs = 0
         binding.playerView.player = player
 
@@ -277,8 +282,8 @@ class fragment_song : Fragment() {
 
     override fun onDetach() {
         super.onDetach()
-        player.stop()
-        player.release()
+//        player.stop()
+//        player.release()
     }
 
     inner class SongListAdapter(val songList: MutableList<MusicDTO>) :
@@ -597,7 +602,7 @@ class fragment_song : Fragment() {
                 musicviewmodel.downloadedUri=""
             }
             else{
-                player.stop()
+                MainActivity.getPlayer(requireContext()).stop()
             }
 
             if (binding.playListGroup.isVisible) {

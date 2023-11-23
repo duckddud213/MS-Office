@@ -51,9 +51,9 @@ class fragment_playlist : Fragment() {
 
     val musicviewmodel: MusicFileViewModel by activityViewModels()
 
+    private lateinit var player: ExoPlayer
 
     //=======================================
-    private lateinit var player: ExoPlayer
     var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
     private val updateSeekRunnable = Runnable {
         savePlayingState()
@@ -61,9 +61,9 @@ class fragment_playlist : Fragment() {
     //=======================================
 
     override fun onAttach(context: Context) {
+        player = MainActivity.getPlayer(context)
         super.onAttach(context)
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavView).menu.findItem(R.id.btnPlayList).isChecked =
@@ -135,51 +135,51 @@ class fragment_playlist : Fragment() {
             }
         }
 
-        player = ExoPlayer.Builder(requireContext()).build()
+//        player = MainActivity.getPlayer(requireContext())
 
         //======================================
-        if (musicviewmodel.isPlaying) {
-            //음악 재생 중에 넘어온 경우
-
-            musicviewmodel.playerNotificationManager =
-                PlayerNotificationManager.Builder(requireActivity(), 5, "MS Office")
-                    .setNotificationListener(object :
-                        PlayerNotificationManager.NotificationListener {
-                        override fun onNotificationPosted(
-                            notificationId: Int,
-                            notification: Notification,
-                            ongoing: Boolean
-                        ) {
-                            super.onNotificationPosted(notificationId, notification, ongoing)
-                            if (ongoing) {
-                                Log.d(TAG, "onNotificationPosted: 재생 중이다")
-                                Log.d(TAG, "onNotificationPosted: ${notification.actions}")
-                            } else {
-                                Log.d(TAG, "onNotificationPosted: 멈췄다")
-                            }
-                        }
-                    })
-                    .setChannelImportance(NotificationManager.IMPORTANCE_HIGH)
-                    .setSmallIconResourceId(R.drawable.music_ssafy_office)
-                    .setChannelDescriptionResourceId(R.string.app_name)
-                    .setPreviousActionIconResourceId(R.drawable.img_skipprevious)
-                    .setPauseActionIconResourceId(R.drawable.img_pause)
-                    .setPlayActionIconResourceId(R.drawable.img_play)
-                    .setNextActionIconResourceId(R.drawable.img_skipnext)
-                    .setChannelNameResourceId(R.string.app_name)
-                    .build()
-
-            musicviewmodel.playerNotificationManager.setPlayer(player)
-
-            var mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
-            player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
-            player.prepare()
-            player.play()
-
-            savePlayingState()
-
-
-        }
+//        if (musicviewmodel.isPlaying) {
+//            //음악 재생 중에 넘어온 경우
+//
+//            musicviewmodel.playerNotificationManager =
+//                PlayerNotificationManager.Builder(requireActivity(), 5, "MS Office")
+//                    .setNotificationListener(object :
+//                        PlayerNotificationManager.NotificationListener {
+//                        override fun onNotificationPosted(
+//                            notificationId: Int,
+//                            notification: Notification,
+//                            ongoing: Boolean
+//                        ) {
+//                            super.onNotificationPosted(notificationId, notification, ongoing)
+//                            if (ongoing) {
+//                                Log.d(TAG, "onNotificationPosted: 재생 중이다")
+//                                Log.d(TAG, "onNotificationPosted: ${notification.actions}")
+//                            } else {
+//                                Log.d(TAG, "onNotificationPosted: 멈췄다")
+//                            }
+//                        }
+//                    })
+//                    .setChannelImportance(NotificationManager.IMPORTANCE_HIGH)
+//                    .setSmallIconResourceId(R.drawable.music_ssafy_office)
+//                    .setChannelDescriptionResourceId(R.string.app_name)
+//                    .setPreviousActionIconResourceId(R.drawable.img_skipprevious)
+//                    .setPauseActionIconResourceId(R.drawable.img_pause)
+//                    .setPlayActionIconResourceId(R.drawable.img_play)
+//                    .setNextActionIconResourceId(R.drawable.img_skipnext)
+//                    .setChannelNameResourceId(R.string.app_name)
+//                    .build()
+//
+//            musicviewmodel.playerNotificationManager.setPlayer(player)
+//
+//            var mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
+//            player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
+//            player.prepare()
+//            player.play()
+//
+//            savePlayingState()
+//
+//
+//        }
 
         //=======================================
     }
@@ -230,8 +230,8 @@ class fragment_playlist : Fragment() {
     override fun onDetach() {
         super.onDetach()
         //프래그먼트간 화면 이동 시 음악 재생 진행률 정보 전달
-        player.stop()
-        player.release()
+//        player.stop()
+//        player.release()
     }
 
     private fun isNotDup(name: String): Boolean {
@@ -353,7 +353,7 @@ class fragment_playlist : Fragment() {
                                 TAG,
                                 "onCreateViewHolder: getCur : ${ApplicationClass.sSharedPreferences.getCurSongList()}"
                             )
-                            
+
                             player.stop()
                             player.release()
 

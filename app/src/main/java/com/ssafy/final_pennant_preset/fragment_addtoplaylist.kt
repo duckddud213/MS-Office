@@ -2,6 +2,7 @@ package com.ssafy.final_pennant_preset
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -52,6 +53,11 @@ class fragment_addtoplaylist : Fragment() {
         }
 
         return false
+    }
+
+    override fun onAttach(context: Context) {
+        player = MainActivity.getPlayer(context)
+        super.onAttach(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -141,47 +147,48 @@ class fragment_addtoplaylist : Fragment() {
         }
 
         //======================================
-        player = ExoPlayer.Builder(requireContext()).build()
-        if (musicfileviewmodel.isPlaying) {
-            //음악 재생 중에 넘어온 경우
+//        player = ExoPlayer.Builder(requireContext()).build()
 
-            musicfileviewmodel.playerNotificationManager =
-                PlayerNotificationManager.Builder(requireActivity(), 5, "MS Office")
-                    .setNotificationListener(object :
-                        PlayerNotificationManager.NotificationListener {
-                        override fun onNotificationPosted(
-                            notificationId: Int,
-                            notification: Notification,
-                            ongoing: Boolean
-                        ) {
-                            super.onNotificationPosted(notificationId, notification, ongoing)
-                            if (ongoing) {
-                                Log.d(TAG, "onNotificationPosted: 재생 중이다")
-                                Log.d(TAG, "onNotificationPosted: ${notification.actions}")
-                            } else {
-                                Log.d(TAG, "onNotificationPosted: 멈췄다")
-                            }
-                        }
-                    })
-                    .setChannelImportance(NotificationManager.IMPORTANCE_HIGH)
-                    .setSmallIconResourceId(R.drawable.music_ssafy_office)
-                    .setChannelDescriptionResourceId(R.string.app_name)
-                    .setPreviousActionIconResourceId(R.drawable.img_skipprevious)
-                    .setPauseActionIconResourceId(R.drawable.img_pause)
-                    .setPlayActionIconResourceId(R.drawable.img_play)
-                    .setNextActionIconResourceId(R.drawable.img_skipnext)
-                    .setChannelNameResourceId(R.string.app_name)
-                    .build()
-
-            musicfileviewmodel.playerNotificationManager.setPlayer(player)
-
-            var mediaItem = MediaItem.fromUri("${uri}/${musicfileviewmodel.selectedMusic.id}")
-            player.setMediaItem(mediaItem, musicfileviewmodel.isPlayingOn)
-            player.prepare()
-            player.play()
-
-            savePlayingState()
-        }
+//        if (musicfileviewmodel.isPlaying) {
+//            //음악 재생 중에 넘어온 경우
+//
+//            musicfileviewmodel.playerNotificationManager =
+//                PlayerNotificationManager.Builder(requireActivity(), 5, "MS Office")
+//                    .setNotificationListener(object :
+//                        PlayerNotificationManager.NotificationListener {
+//                        override fun onNotificationPosted(
+//                            notificationId: Int,
+//                            notification: Notification,
+//                            ongoing: Boolean
+//                        ) {
+//                            super.onNotificationPosted(notificationId, notification, ongoing)
+//                            if (ongoing) {
+//                                Log.d(TAG, "onNotificationPosted: 재생 중이다")
+//                                Log.d(TAG, "onNotificationPosted: ${notification.actions}")
+//                            } else {
+//                                Log.d(TAG, "onNotificationPosted: 멈췄다")
+//                            }
+//                        }
+//                    })
+//                    .setChannelImportance(NotificationManager.IMPORTANCE_HIGH)
+//                    .setSmallIconResourceId(R.drawable.music_ssafy_office)
+//                    .setChannelDescriptionResourceId(R.string.app_name)
+//                    .setPreviousActionIconResourceId(R.drawable.img_skipprevious)
+//                    .setPauseActionIconResourceId(R.drawable.img_pause)
+//                    .setPlayActionIconResourceId(R.drawable.img_play)
+//                    .setNextActionIconResourceId(R.drawable.img_skipnext)
+//                    .setChannelNameResourceId(R.string.app_name)
+//                    .build()
+//
+//            musicfileviewmodel.playerNotificationManager.setPlayer(player)
+//
+//            var mediaItem = MediaItem.fromUri("${uri}/${musicfileviewmodel.selectedMusic.id}")
+//            player.setMediaItem(mediaItem, musicfileviewmodel.isPlayingOn)
+//            player.prepare()
+//            player.play()
+//
+//            savePlayingState()
+//        }
 
         //=======================================
     }

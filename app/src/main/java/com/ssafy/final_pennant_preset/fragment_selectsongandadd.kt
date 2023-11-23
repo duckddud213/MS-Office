@@ -3,6 +3,7 @@ package com.ssafy.final_pennant_preset
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.ContentUris
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -45,7 +46,7 @@ class fragment_selectsongandadd : Fragment() {
     private val playList = mutableListOf<PlayListDTO>()
 
     //=======================================
-    private lateinit var player: ExoPlayer
+    private var player: ExoPlayer = MainActivity.getPlayer(requireContext())
     var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
     private val updateSeekRunnable = Runnable {
         savePlayingState()
@@ -58,6 +59,11 @@ class fragment_selectsongandadd : Fragment() {
         }
 
         return false
+    }
+
+    override fun onAttach(context: Context) {
+        player = MainActivity.getPlayer(context)
+        super.onAttach(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -163,7 +169,7 @@ class fragment_selectsongandadd : Fragment() {
         }
 
         //======================================
-        player = ExoPlayer.Builder(requireContext()).build()
+//        player = MainActivity.getPlayer(requireContext())
         if (musicfileviewmodel.isPlaying) {
             //음악 재생 중에 넘어온 경우
 
@@ -211,14 +217,14 @@ class fragment_selectsongandadd : Fragment() {
     override fun onDetach() {
         super.onDetach()
         //프래그먼트간 화면 이동 시 음악 재생 진행률 정보 전달
-        player.stop()
-        player.release()
+//        player.stop()
+//        player.release()
     }
 
     override fun onPause() {
         super.onPause()
-        player.stop()
-        player.release()
+//        player.stop()
+//        player.release()
     }
 
     //=======================================

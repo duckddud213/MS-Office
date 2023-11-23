@@ -22,6 +22,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentManager
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -356,6 +357,16 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val RC_SIGN_IN = 9001
 
+        private var player: ExoPlayer? = null
+        fun getPlayer(context: Context) : ExoPlayer {
+            Log.d(TAG, "getPlayer1: $player")
+            if (player == null) player = ExoPlayer.Builder(context).build()
+            Log.d(TAG, "getPlayer2: $player")
+            return player!!
+        }
+//        val player: ExoPlayer by lazy {
+//            ExoPlayer.Builder(ApplicationClass.getContext()).build()
+//        }
         // main에 1개
         // firebaseservice에 1개 주석 처리되있음
         fun uploadToken(token:String){
