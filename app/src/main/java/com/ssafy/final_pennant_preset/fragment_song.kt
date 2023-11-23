@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -24,6 +25,7 @@ import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat.stopForeground
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -46,6 +48,7 @@ import com.ssafy.final_pennant_preset.config.ApplicationClass
 import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 import com.ssafy.final_pennant_preset.dto.PlayListDTO
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 
@@ -60,6 +63,8 @@ class fragment_song : Fragment() {
     final var notificationId = 5
 
     val musicviewmodel: MusicFileViewModel by activityViewModels()
+    val mainActivityViewModel: MainActivityViewModel by activityViewModels()
+
     var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
     lateinit var playerNotificationManager: PlayerNotificationManager
 
@@ -180,6 +185,7 @@ class fragment_song : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("SuspiciousIndentation")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -567,7 +573,13 @@ class fragment_song : Fragment() {
             }
         }
     }
-
+    fun getDownloadFileToUri(): Uri? {
+        val file =
+            File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + mainActivityViewModel.downloadFile)
+        Log.d(TAG, "getDownloadFileToUri: $file")
+        if (file.isFile) return file.toUri()
+        return null
+    }
 //    private fun setMusicList(modelList: List<MusicModel>) {
 //        player ?: return
 //        context?.let {

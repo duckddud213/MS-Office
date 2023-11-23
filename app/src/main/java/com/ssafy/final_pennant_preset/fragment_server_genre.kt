@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.ColorFilter
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.view.ContextMenu
@@ -44,8 +45,6 @@ class fragment_server_genre : Fragment() {
 
     private lateinit var mainActivity: MainActivity
 
-    private lateinit var serverMusic : ArrayList<ServerMusicDTO>
-
     private lateinit var musicListAdapter : MusicListAdapter
     private lateinit var downLoader : MusicDownloader
 
@@ -78,6 +77,7 @@ class fragment_server_genre : Fragment() {
             override fun onMyClick(view: View, dto: ServerMusicDTO) {
                 Toast.makeText(mainActivity, "${dto}를 다운로드합니다", Toast.LENGTH_SHORT).show()
                 downLoader.downloadFile(dto.musicUrl, dto.musicName)
+                mainActivityViewModel.downloadFile = "/msOffice/${dto.musicName}"
             }
         }
 
@@ -125,8 +125,6 @@ class fragment_server_genre : Fragment() {
                     tv_genre.background.alpha = 100
                     // 투명도
                 }
-
-//                tv_genre.background =
             }
 
             override fun onCreateContextMenu(
@@ -146,8 +144,6 @@ class fragment_server_genre : Fragment() {
                         menu?.findItem(R.id.server_removeItem)
                             ?.setOnMenuItemClickListener {
                                 mainActivityViewModel.deleteMusic(genre!!, serverMusic.musicId)
-//                                musicListAdapter.getItem(layoutPosition). .genreList.remove(serverMusic)
-//                                musicListAdapter.genreList.remove(serverMusic)
                                 true
                         }
                     }

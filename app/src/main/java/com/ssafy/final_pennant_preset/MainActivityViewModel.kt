@@ -19,6 +19,13 @@ class MainActivityViewModel : ViewModel() {
     val musicWithGenre: LiveData<List<ServerMusicDTO>>
         get() = _musicWithGenre
 
+    private var _downloadFile = ""
+    var downloadFile: String
+        get() = _downloadFile
+        set(value) {
+            _downloadFile = value
+        }
+
     fun setListWithGenre(genre: String) {
         CoroutineScope(Dispatchers.Main).launch {
             try {
