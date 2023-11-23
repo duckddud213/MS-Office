@@ -259,7 +259,7 @@ class fragment_selectsongandadd : Fragment() {
         Log.d(TAG, "savePlayingState: 진짜 바뀌나? : ${musicfileviewmodel.isPlayingOn}")
 
         if (player.playbackState != Player.STATE_IDLE && player.playbackState != Player.STATE_ENDED) {
-            view?.postDelayed(updateSeekRunnable, 1000) // 1초에 한번씩 실행
+            view?.postDelayed(updateSeekRunnable, 100) // 1초에 한번씩 실행
         }
     }
     //=======================================

@@ -536,7 +536,7 @@ class fragment_song : Fragment() {
         view?.removeCallbacks(updateSeekRunnable)
         // 재생 중 일때 (대 중이 아니거나, 재생이 끝나지 않은 경우)
         if (state != Player.STATE_IDLE && state != Player.STATE_ENDED) {
-            view?.postDelayed(updateSeekRunnable, 1000) // 1초에 한번씩 실행
+            view?.postDelayed(updateSeekRunnable, 100) // 1초에 한번씩 실행
         }
 
     }
@@ -548,7 +548,7 @@ class fragment_song : Fragment() {
         binding.playerSeekBar.max = (duration / 1000).toInt()
         binding.playerSeekBar.progress = (position / 1000).toInt()
 
-        musicviewmodel.isPlayingOn = player.currentPosition + 1000
+        musicviewmodel.isPlayingOn = player.currentPosition
         Log.d(TAG, "updateSeekUi: 시간 업데이트? : ${musicviewmodel.isPlayingOn}")
         binding.playTimeTextView.text = String.format(
             "%02d:%02d",
