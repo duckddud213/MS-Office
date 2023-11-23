@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.FragmentManager
@@ -80,14 +81,17 @@ class fragment_currentlist : Fragment() {
                     break
                 }
             }
-
-            currentPlayListAdapter =
-                CurrentPlayListAdapter(musicviewmodel.selectedPlayList.songlist)
+            musicviewmodel.selectedPlayList.songlist=list
+//            list = musicviewmodel.selectedPlayList.songlist
+//            currentPlayListAdapter =
+//                CurrentPlayListAdapter(musicviewmodel.selectedPlayList.songlist)
         } else {
             //선택된 재생목록이 없는 경우 => 빈 리스트 전달
             binding.tvCurrentList.text = "선택된 재생목록 없음"
-            currentPlayListAdapter = CurrentPlayListAdapter(mutableListOf<MusicDTO>())
+            list = mutableListOf<MusicDTO>()
         }
+
+        currentPlayListAdapter = CurrentPlayListAdapter(list)
 
         binding.rvCurrentPlayList.apply {
             adapter = currentPlayListAdapter
@@ -105,7 +109,7 @@ class fragment_currentlist : Fragment() {
         if (musicviewmodel.isPlaying) {
             //음악 재생 중에 넘어온 경우
 
-            var playerNotificationManager =
+            musicviewmodel.playerNotificationManager =
                 PlayerNotificationManager.Builder(requireActivity(), 5, "MS Office")
                     .setNotificationListener(object :
                         PlayerNotificationManager.NotificationListener {
@@ -133,7 +137,7 @@ class fragment_currentlist : Fragment() {
                     .setChannelNameResourceId(R.string.app_name)
                     .build()
 
-            playerNotificationManager.setPlayer(player)
+            musicviewmodel.playerNotificationManager.setPlayer(player)
 
             var mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
             player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
@@ -144,6 +148,19 @@ class fragment_currentlist : Fragment() {
         }
 
         //=======================================
+
+        binding.fabAddNewPlayList.setOnClickListener {
+            if (musicviewmodel.selectedPlaylistName.equals("")) {
+                Toast.makeText(requireContext(), "선택된 재생목록이 없습니다!", Toast.LENGTH_SHORT).show()
+            } else {
+                player.stop()
+                player.release()
+
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.framecontainer, fragment_selectsongandadd())
+                    .addToBackStack("addSongToPlayList").commit()
+            }
+        }
     }
 
     override fun onDetach() {
@@ -240,23 +257,20 @@ class fragment_currentlist : Fragment() {
                                     musicviewmodel.selectedPlaylistName,
                                     songlist[layoutPosition]
                                 )
+
                                 musicviewmodel.selectedPlayList.songlist.removeAt(layoutPosition)
-                                list =
-                                    ApplicationClass.sSharedPreferences.getSongList(musicviewmodel.selectedPlaylistName)
-                                musicviewmodel.selectedPlayList =
-                                    PlayListDTO(musicviewmodel.selectedPlaylistName, list)
+                                list = musicviewmodel.selectedPlayList.songlist
+                                ApplicationClass.sSharedPreferences.putSongList(musicviewmodel.selectedPlaylistName,list)
+                                Log.d(TAG, "onCreateContextMenu: ${layoutPosition}")
                                 binding.rvCurrentPlayList.adapter!!.notifyItemRemoved(layoutPosition)
+
                                 if (musicviewmodel.selectedMusicPosition == layoutPosition) {
-                                    //재생 중이던 곡이 삭제된 경우 => 다음곡으로 넘김
-//                                    musicviewmodel.selectedMusicPosition = musicviewmodel.selectedMusicPosition
+                                    //재생 중이던 곡이 삭제된 경우 => 음악 정지
+                                    player.stop()
+                                    player.release()
                                     musicviewmodel.selectedMusicPosition %= musicviewmodel.selectedPlayList.songlist.size
-
-                                    ApplicationClass.sSharedPreferences.putSelectedSongPosition(
-                                        musicviewmodel.selectedMusicPosition
-                                    )
+                                    ApplicationClass.sSharedPreferences.putSelectedSongPosition(-1)
                                 }
-
-
                             }
                             builder.setNegativeButton(
                                 "취소"
@@ -279,7 +293,9 @@ class fragment_currentlist : Fragment() {
                 //클릭 시 해당 곡 재생 기능 추가
                 itemView.setOnClickListener {
                     Log.d(TAG, "onCreateViewHolder: position : ${layoutPosition}")
-
+                    if (musicviewmodel.selectedMusic != songlist[layoutPosition]) {
+                        musicviewmodel.checkSameSong = false
+                    }
                     musicviewmodel.selectedMusic = songlist[layoutPosition]
                     musicviewmodel.selectedMusicPosition = layoutPosition
                     ApplicationClass.sSharedPreferences.putSelectedSongPosition(layoutPosition)

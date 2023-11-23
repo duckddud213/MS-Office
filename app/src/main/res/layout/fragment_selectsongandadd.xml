@@ -12,7 +12,7 @@
         android:layout_marginRight="15dp">
 
         <LinearLayout
-            android:id="@+id/layoutPageInfo"
+            android:id="@+id/layoutPageInfo2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -27,7 +27,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="해당 곡을 추가할 \n 재생 목록을 선택해주세요."
+                android:text="해당 재생목록에 추가할 \n 곡을 선택해주세요."
                 android:textAlignment="center"
                 android:textSize="24sp"
                 app:layout_constraintStart_toStartOf="parent"
@@ -35,41 +35,41 @@
         </LinearLayout>
 
         <View
-            android:id="@+id/horizontal_divider"
+            android:id="@+id/horizontal_divider2"
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="20dp"
             android:background="@drawable/gradient"
-            app:layout_constraintBottom_toTopOf="@id/lvAddPlaylist"
+            app:layout_constraintBottom_toTopOf="@id/lvAddPlaylist2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layoutPageInfo" />
+            app:layout_constraintTop_toBottomOf="@id/layoutPageInfo2" />
 
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/lvAddPlaylist"
+            android:id="@+id/lvAddPlaylist2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="20dp"
             android:paddingBottom="100dp"
             android:choiceMode="multipleChoice"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/horizontal_divider" />
+            app:layout_constraintTop_toBottomOf="@+id/horizontal_divider2" />
 
         <Button
-            android:id="@+id/btnAddSongToSelectedPlaylist"
+            android:id="@+id/btnAddSongToSelectedPlaylist2"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="20dp"
             android:backgroundTint="@color/colorPrimary"
             android:text="추가"
-            app:layout_constraintBottom_toTopOf="@+id/btnGoBacks"
-            app:layout_constraintEnd_toEndOf="@+id/lvAddPlaylist" />
+            app:layout_constraintBottom_toTopOf="@+id/btnGoBacks2"
+            app:layout_constraintEnd_toEndOf="@+id/lvAddPlaylist2" />
 
         <Button
-            android:id="@+id/btnGoBacks"
+            android:id="@+id/btnGoBacks2"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"

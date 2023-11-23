@@ -100,7 +100,7 @@ class fragment_totallist : Fragment() {
         //======================================
         if (musicviewmodel.isPlaying) {
             //음악 재생 중에 넘어온 경우
-            var playerNotificationManager =
+            musicviewmodel.playerNotificationManager =
                 PlayerNotificationManager.Builder(requireActivity(), 5, "MS Office")
                     .setNotificationListener(object :
                         PlayerNotificationManager.NotificationListener {
@@ -128,7 +128,7 @@ class fragment_totallist : Fragment() {
                     .setChannelNameResourceId(R.string.app_name)
                     .build()
 
-            playerNotificationManager.setPlayer(player)
+            musicviewmodel.playerNotificationManager.setPlayer(player)
 
             var mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
             player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
@@ -249,6 +249,9 @@ class fragment_totallist : Fragment() {
                 if (insertImg != null) {
                     var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                     songImg.setImageBitmap(bitmap)
+                }
+                else{
+                    songImg.setImageResource(R.drawable.music_ssafy_office)
                 }
 
             }

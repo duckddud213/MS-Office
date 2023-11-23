@@ -43,7 +43,7 @@
         android:id="@+id/tvGenre"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="genre"
+        android:text=""
         android:textAlignment="viewEnd"
         android:paddingRight="30dp"
         app:layout_constraintStart_toStartOf="parent"

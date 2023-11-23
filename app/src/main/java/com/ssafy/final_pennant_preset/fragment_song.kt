@@ -61,7 +61,7 @@ class fragment_song : Fragment() {
 
     val musicviewmodel: MusicFileViewModel by activityViewModels()
     var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-    lateinit var playerNotificationManager: PlayerNotificationManager
+//    lateinit var playerNotificationManager: PlayerNotificationManager
 
     private lateinit var player: ExoPlayer
     private var list = mutableListOf<MusicDTO>()
@@ -86,7 +86,7 @@ class fragment_song : Fragment() {
             labelVisibilityMode = NavigationBarView.LABEL_VISIBILITY_UNLABELED
         }
 
-        playerNotificationManager =
+        musicviewmodel.playerNotificationManager =
             PlayerNotificationManager.Builder(requireActivity(), notificationId, "MS Office")
                 .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
                     override fun onNotificationPosted(
@@ -102,6 +102,13 @@ class fragment_song : Fragment() {
                             Log.d(TAG, "onNotificationPosted: 멈췄다")
                         }
                     }
+
+                    override fun onNotificationCancelled(
+                        notificationId: Int,
+                        dismissedByUser: Boolean
+                    ) {
+                        super.onNotificationCancelled(notificationId, dismissedByUser)
+                    }
                 })
                 .setChannelImportance(IMPORTANCE_HIGH)
                 .setSmallIconResourceId(R.drawable.music_ssafy_office)
@@ -114,7 +121,7 @@ class fragment_song : Fragment() {
                 .build()
 
 
-        playerNotificationManager.setUseNextAction(true)
+        musicviewmodel.playerNotificationManager.setUseNextAction(true)
     }
 
     override fun onCreateView(
@@ -144,6 +151,9 @@ class fragment_song : Fragment() {
                 if (insertImg != null) {
                     var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                     binding.coverImageView.setImageBitmap(bitmap)
+                }
+                else{
+                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
                 }
             }
         } else {
@@ -187,7 +197,7 @@ class fragment_song : Fragment() {
 //        binding.playerView.showTimeoutMs = 0
         binding.playerView.player = player
 
-        playerNotificationManager.setPlayer(player)
+        musicviewmodel.playerNotificationManager.setPlayer(player)
 
         binding.playListRecyclerView.apply {
             adapter = adapter
@@ -214,10 +224,18 @@ class fragment_song : Fragment() {
                 var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                 binding.coverImageView.setImageBitmap(bitmap)
             }
+            else{
+                binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+            }
 
             mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
 
-                player.setMediaItem(mediaItem, 0)
+            if(musicviewmodel.checkSameSong){
+                player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
+            }
+            else player.setMediaItem(mediaItem,0)
+
+            musicviewmodel.checkSameSong=true
 
             binding.playControlImageView.setImageResource(R.drawable.img_pause)
             player.prepare()
@@ -227,12 +245,7 @@ class fragment_song : Fragment() {
         else if(!musicviewmodel.selectedMusic.equals(MusicDTO(-1, "", -1, "", ""))){
             //한 곡 재생인 경우
             mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
-//            if (musicviewmodel.checkSameSong == true) {
-//                player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)
-//            } else {
-//                Log.d(TAG, "onViewCreated: 왜 checkSameSong false?")
                 player.setMediaItem(mediaItem, 0)
-//            }
             binding.playControlImageView.setImageResource(R.drawable.img_pause)
             player.prepare()
             player.play()
@@ -278,6 +291,9 @@ class fragment_song : Fragment() {
                     var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                     img.setImageBitmap(bitmap)
                 }
+                else{
+                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+                }
 
             }
         }
@@ -313,6 +329,9 @@ class fragment_song : Fragment() {
                     if (insertImg != null) {
                         var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                         binding.coverImageView.setImageBitmap(bitmap)
+                    }
+                    else{
+                        binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
                     }
 
                     binding.playListGroup.isVisible = binding.playerViewGroup.isVisible.also {
@@ -403,6 +422,9 @@ class fragment_song : Fragment() {
                     var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                     binding.coverImageView.setImageBitmap(bitmap)
                 }
+                else{
+                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+                }
 
                 if (binding.playListGroup.isVisible) {
                     binding.playListGroup.isVisible = !binding.playListGroup.isVisible
@@ -435,6 +457,9 @@ class fragment_song : Fragment() {
                 if (insertImg != null) {
                     var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                     binding.coverImageView.setImageBitmap(bitmap)
+                }
+                else{
+                    binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
                 }
 
                 ApplicationClass.sSharedPreferences.putSelectedSongPosition(musicviewmodel.selectedMusicPosition)
@@ -528,6 +553,9 @@ class fragment_song : Fragment() {
                 var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
                 binding.coverImageView.setImageBitmap(bitmap)
             }
+            else{
+                binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
+            }
 
             if (binding.playListGroup.isVisible) {
                 binding.playListGroup.isVisible = !binding.playListGroup.isVisible
@@ -548,6 +576,9 @@ class fragment_song : Fragment() {
         if (insertImg != null) {
             var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
             binding.coverImageView.setImageBitmap(bitmap)
+        }
+        else{
+            binding.coverImageView.setImageResource(R.drawable.music_ssafy_office)
         }
 
     }

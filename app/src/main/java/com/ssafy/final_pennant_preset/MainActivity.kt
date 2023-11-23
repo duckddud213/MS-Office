@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
@@ -30,6 +31,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.ssafy.final_pennant.R
 import com.ssafy.final_pennant.databinding.ActivityMainBinding
 import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 import com.ssafy.final_pennant_preset.util.RetrofitUtil
 import retrofit2.Call
 import retrofit2.Callback
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     // [END declare_auth]
     private lateinit var googleSignInClient: GoogleSignInClient
+    val musicviewmodel : MusicFileViewModel by viewModels()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,8 +101,13 @@ class MainActivity : AppCompatActivity() {
 
         checkLogin()
         initNotificationChannel()
+
+        var downloadmanager : DownloadCompletedReceiver
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
 
     // firebase 로그인 관련
 

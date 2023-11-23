@@ -141,7 +141,7 @@ class fragment_playlist : Fragment() {
         if (musicviewmodel.isPlaying) {
             //음악 재생 중에 넘어온 경우
 
-            var playerNotificationManager =
+            musicviewmodel.playerNotificationManager =
                 PlayerNotificationManager.Builder(requireActivity(), 5, "MS Office")
                     .setNotificationListener(object :
                         PlayerNotificationManager.NotificationListener {
@@ -169,7 +169,7 @@ class fragment_playlist : Fragment() {
                     .setChannelNameResourceId(R.string.app_name)
                     .build()
 
-            playerNotificationManager.setPlayer(player)
+            musicviewmodel.playerNotificationManager.setPlayer(player)
 
             var mediaItem = MediaItem.fromUri("${uri}/${musicviewmodel.selectedMusic.id}")
             player.setMediaItem(mediaItem, musicviewmodel.isPlayingOn)

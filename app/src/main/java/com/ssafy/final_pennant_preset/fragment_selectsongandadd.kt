@@ -2,6 +2,9 @@ package com.ssafy.final_pennant_preset
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.content.ContentUris
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -10,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -21,18 +25,19 @@ import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.ssafy.final_pennant.R
-import com.ssafy.final_pennant.databinding.FragmentAddtoplaylistBinding
+import com.ssafy.final_pennant.databinding.FragmentSelectsongandaddBinding
 import com.ssafy.final_pennant_preset.config.ApplicationClass
+import com.ssafy.final_pennant_preset.dto.MusicDTO
 import com.ssafy.final_pennant_preset.dto.MusicFileViewModel
 import com.ssafy.final_pennant_preset.dto.PlayListDTO
-import com.ssafy.final_pennant_preset.dto.checkboxData
+import com.ssafy.final_pennant_preset.dto.checkboxSongData
 import java.util.concurrent.TimeUnit
 
-private const val TAG = "fragment_addtoplaylist_싸피"
+private const val TAG = "fragment_selectsonganda_싸피"
 
-class fragment_addtoplaylist : Fragment() {
-    private var _binding: FragmentAddtoplaylistBinding? = null
-    private val binding: FragmentAddtoplaylistBinding
+class fragment_selectsongandadd : Fragment() {
+    private var _binding: FragmentSelectsongandaddBinding? = null
+    private val binding: FragmentSelectsongandaddBinding
         get() = _binding!!
 
     val musicfileviewmodel: MusicFileViewModel by activityViewModels()
@@ -46,8 +51,8 @@ class fragment_addtoplaylist : Fragment() {
     }
     //=======================================
 
-    fun checkSameData(Name1: String, Name2: String): Boolean {
-        if (Name1.equals(Name2)) {
+    fun checkSameSongData(Name1: String, Name2: String, Artist1: String, Artist2: String): Boolean {
+        if (Name1==Name2 && Artist1==Artist2) {
             return true
         }
 
@@ -56,18 +61,19 @@ class fragment_addtoplaylist : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        musicfileviewmodel.checkedPlayList.clear()
+        musicfileviewmodel.checkedSongList.clear()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentAddtoplaylistBinding.inflate(inflater, container, false)
-        val allplaylistadapter = AllPlayListAdapter(musicfileviewmodel.playList)
-        binding.lvAddPlaylist.apply {
-            adapter = allplaylistadapter
+        _binding = FragmentSelectsongandaddBinding.inflate(inflater, container, false)
+        val allsonglistadapter = AllSongListAdapter(musicfileviewmodel.MusicList)
+        binding.lvAddPlaylist2.apply {
+            adapter = allsonglistadapter
             this.layoutManager = LinearLayoutManager(requireActivity())
+            addItemDecoration(CustomItemDecoration(requireContext()))
         }
         return binding.root
     }
@@ -77,40 +83,36 @@ class fragment_addtoplaylist : Fragment() {
 
         //재생목록이 없는 상태면 Toast메시지나 Dialog로 안내하고 강제로 페이지 전환 추가
 
-        var songInfo = musicfileviewmodel.selectedMusicToBeAdded
-
-        binding.btnAddSongToSelectedPlaylist.setOnClickListener {
-            Log.d(TAG, "onViewCreated: ${musicfileviewmodel.checkedPlayList.size}")
-
-            for (i in 0..musicfileviewmodel.checkedPlayList.size - 1) {
-                Log.d(TAG, "onViewCreated: ${i}번 데이터 => ${musicfileviewmodel.checkedPlayList[i]}")
-            }
-
-            for (i in 0..musicfileviewmodel.checkedPlayList.size - 1) {
-                for (j in 0..musicfileviewmodel.playList.size - 1) {
-                    //cId, cName : 체크한 항목 || pId, pName : 전체 재생 목록에 있는 항목
-                    var cName = musicfileviewmodel.checkedPlayList[i].playlistname
-                    var pName = musicfileviewmodel.playList[j].playlistname
+        binding.btnAddSongToSelectedPlaylist2.setOnClickListener {
+            for (i in 0..musicfileviewmodel.checkedSongList.size - 1) {
+                for (j in 0..musicfileviewmodel.MusicList.size - 1) {
+                    //cId, cName : 체크한 항목 || pId, pName : 전체 곡 목록에 있는 항목
+                    var cName = musicfileviewmodel.checkedSongList[i].songtitle
+                    var cArtist = musicfileviewmodel.checkedSongList[i].songartist
+                    var pName = musicfileviewmodel.MusicList[j].title
+                    var pArtist = musicfileviewmodel.MusicList[j].artist
                     var isDup = false
 
-                    if (checkSameData(cName, pName)) {
-                        for (k in 0..musicfileviewmodel.playList[j].songlist.size - 1) {
-                            //이미 재생목록에 있는 곡일 경우 추가하지 않음
-                            if (musicfileviewmodel.playList[j].songlist.get(k).equals(songInfo)) {
+                    if (checkSameSongData(cName, pName, cArtist, pArtist)) {
+                        for (k in 0..musicfileviewmodel.selectedPlayList.songlist.size - 1) {
+                            //이미 현재 재생목록에 있는 곡일 경우 추가하지 않음
+                            if (checkSameSongData(
+                                    musicfileviewmodel.selectedPlayList.songlist[k].title,
+                                    cName,
+                                    musicfileviewmodel.selectedPlayList.songlist[k].artist,
+                                    cArtist
+                                )
+                            ) {
                                 isDup = true
                             }
                         }
                         if (!isDup) {
-                            musicfileviewmodel.playList[j].songlist.add(songInfo)
+                            musicfileviewmodel.selectedPlayList.songlist.add(musicfileviewmodel.MusicList[j])
                         }
-                        Log.d(
-                            TAG,
-                            "onViewCreated: ${musicfileviewmodel.playList[j].playlistname} / ${musicfileviewmodel.playList[j].songlist.size}"
-                        )
                     }
                     ApplicationClass.sSharedPreferences.putSongList(
-                        musicfileviewmodel.playList[j].playlistname,
-                        musicfileviewmodel.playList[j].songlist
+                        musicfileviewmodel.selectedPlaylistName,
+                        musicfileviewmodel.selectedPlayList.songlist
                     )
                 }
             }
@@ -119,25 +121,23 @@ class fragment_addtoplaylist : Fragment() {
             player.release()
 
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.framecontainer, fragment_totallist()).commit()
+                .replace(R.id.framecontainer, fragment_currentlist()).commit()
 
-            if(musicfileviewmodel.checkedPlayList.size==0){
-                Toast.makeText(requireContext(), "선택된 재생목록이 없습니다.", Toast.LENGTH_SHORT).show()
-            }
-            else{
+            if (musicfileviewmodel.checkedSongList.size == 0) {
+                Toast.makeText(requireContext(), "재생 목록에 추가된 곡이 없습니다.", Toast.LENGTH_SHORT).show()
+            } else {
                 Toast.makeText(requireContext(), "재생 목록에 추가되었습니다.", Toast.LENGTH_SHORT).show()
             }
 
-            musicfileviewmodel.checkedPlayList.clear()
-
+            musicfileviewmodel.checkedSongList.clear()
         }
 
-        binding.btnGoBacks.setOnClickListener {
+        binding.btnGoBacks2.setOnClickListener {
             player.stop()
             player.release()
 
             requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.framecontainer, fragment_totallist()).commit()
+                .replace(R.id.framecontainer, fragment_currentlist()).commit()
         }
 
         //======================================
@@ -242,58 +242,83 @@ class fragment_addtoplaylist : Fragment() {
     }
     //=======================================
 
-    inner class AllPlayListAdapter(val playlists: MutableList<PlayListDTO>) :
-        RecyclerView.Adapter<AllPlayListAdapter.AllPlayListViewHolder>() {
+    inner class AllSongListAdapter(val songlist: MutableList<MusicDTO>) :
+        RecyclerView.Adapter<AllSongListAdapter.AllSongListViewHolder>() {
 
-        inner class AllPlayListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            var title = itemView.findViewById<TextView>(R.id.tvPlayLists)
-            var checkBox = itemView.findViewById<CheckBox>(R.id.checkBox1)
+        inner class AllSongListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            var title = itemView.findViewById<TextView>(R.id.tvTitle2)
+            var artist = itemView.findViewById<TextView>(R.id.tvArtist2)
+            var genre = itemView.findViewById<TextView>(R.id.tvGenre2)
+            var checkBox = itemView.findViewById<CheckBox>(R.id.checkBox2)
+            var img = itemView.findViewById<ImageView>(R.id.ivSongImg2)
 
-            fun bind(playlist: PlayListDTO) {
-                title.text = playlist.playlistname
+            fun bind(songlist: MusicDTO) {
+                title.text = songlist.title
+                artist.text = songlist.artist
+                genre.text = songlist.genre
+
+                Log.d(TAG, "bind: 현재 bind된 데이터 => ${title.text} / ${artist.text} / ${genre.text} / ${checkBox.isChecked} / ")
+                
+                for(i in 0..musicfileviewmodel.checkedSongList.size-1){
+                    Log.d(TAG, "bind: 현재 checkedList는 : ${musicfileviewmodel.checkedSongList[i]}")
+                }
+
+                var musicImg = MediaMetadataRetriever()
+                musicImg.setDataSource(
+                    requireContext(),
+                    ContentUris.withAppendedId(uri, songlist.id)
+                )
+                var insertImg = musicImg.embeddedPicture
+
+                if (insertImg != null) {
+                    var bitmap = BitmapFactory.decodeByteArray(insertImg, 0, insertImg.size)
+                    img.setImageBitmap(bitmap)
+                }
+                else{
+                    img.setImageResource(R.drawable.music_ssafy_office)
+                }
+
                 checkBox.setOnClickListener {
                     var checked =
-                        checkboxData(playlist.playlistname, checkBox.isChecked)
+                        checkboxSongData(songlist.title, songlist.artist, checkBox.isChecked)
+
                     if (!checkBox.isChecked) {
-                        for (i in 0..musicfileviewmodel.checkedPlayList.size - 1) {
-                            if (checkSameData(
-                                    musicfileviewmodel.checkedPlayList[i].playlistname,
-                                    checked.playlistname
-                                )
-                            ) {
-                                musicfileviewmodel.checkedPlayList.removeAt(i)
-                                Log.d(
-                                    TAG,
-                                    "bind: 현재 크기는 ${musicfileviewmodel.checkedPlayList.size}"
-                                )
+                        for (i in 0..musicfileviewmodel.checkedSongList.size - 1) {
+                            Log.d(TAG, "bind: 값 확인 ${musicfileviewmodel.checkedSongList[i].songtitle} / ${checked.songtitle} / ${musicfileviewmodel.checkedSongList[i].songartist} / ${checked.songartist}")
+                            if (checkSameSongData(musicfileviewmodel.checkedSongList[i].songtitle,checked.songtitle,musicfileviewmodel.checkedSongList[i].songartist,checked.songartist)) {
+                                musicfileviewmodel.checkedSongList.removeAt(i)
+                                Log.d(TAG, "bind: 삭제 위치 : ${i} / ${adapterPosition}")
+                                Log.d(TAG,"bind: 현재 크기는 ${musicfileviewmodel.checkedSongList.size}")
                                 break
                             }
                         }
                     } else {
-                        musicfileviewmodel.checkedPlayList.add(checked)
+                        musicfileviewmodel.checkedSongList.add(checked)
                     }
-                    Log.d(TAG, "bind: check box 클릭됨 =>${adapterPosition} /  ${checkBox.isChecked}")
+                    for (i in 0..musicfileviewmodel.checkedSongList.size - 1) {
+                        Log.d(TAG, "bind: ${i}번 데이터 => ${musicfileviewmodel.checkedSongList[i]}")
+                    }
                 }
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AllPlayListViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AllSongListViewHolder {
             val view =
                 LayoutInflater.from(parent.context)
-                    .inflate(R.layout.playlist_listview_item, parent, false)
-            return AllPlayListViewHolder(view).apply {
+                    .inflate(R.layout.songlist_tobeadded_toplaylist, parent, false)
+            return AllSongListViewHolder(view).apply {
             }
         }
 
         override fun onBindViewHolder(
-            holder: AllPlayListAdapter.AllPlayListViewHolder,
+            holder: AllSongListAdapter.AllSongListViewHolder,
             position: Int
         ) {
-            holder.bind(playlists.get(position))
+            holder.bind(songlist.get(position))
         }
 
         override fun getItemCount(): Int {
-            return playlists.size
+            return songlist.size
         }
     }
 }
