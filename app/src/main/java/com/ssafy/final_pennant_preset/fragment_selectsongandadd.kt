@@ -46,7 +46,8 @@ class fragment_selectsongandadd : Fragment() {
     private val playList = mutableListOf<PlayListDTO>()
 
     //=======================================
-    private var player: ExoPlayer = MainActivity.getPlayer(requireContext())
+    private lateinit var player: ExoPlayer
+//    private var player: ExoPlayer = MainActivity.getPlayer(requireContext())
     var uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
     private val updateSeekRunnable = Runnable {
         savePlayingState()
